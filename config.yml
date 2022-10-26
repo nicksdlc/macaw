@@ -1,0 +1,9 @@
+Mock: RabbitMQ
+Rabbit:
+  Host: localhost
+  Port: 5672
+  User: guest
+  Password: guest
+  RequestQueue: q.retrieval
+  ResponseQueue: q.response
+ResponseTemplate: ./response_short.json

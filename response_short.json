@@ -1,0 +1,10 @@
+{
+    "version": "1.0",
+    "eventTimeUtc": "{{.Date}}",
+    "status": "Success",
+    "reason": "Retrieved",
+    "requestId": {{.FromRequest "requestId"}},
+    "policyEventTimeUtc": "{{.FromRequest "eventTimeUtc"}}",
+    "bulkId": {{.Number "incremental"}},
+    "bulksCount": {{.Amount}} 
+}
