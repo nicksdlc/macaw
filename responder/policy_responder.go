@@ -1,9 +1,9 @@
 package responder
 
 import (
+	"macaw/config"
 	"macaw/data"
 	"macaw/template"
-	"math/rand"
 	"os"
 )
 
@@ -12,18 +12,18 @@ type Responder interface {
 	Generate(request data.Request) []data.Response
 }
 
-// PolicyResponder generates policy responses
-type PolicyResponder struct {
-	TemplatePath string
+// GenericResponder generates policy responses
+type GenericResponder struct {
+	Response config.Response
 }
 
 // Generate creates a random amount of
-func (pr *PolicyResponder) Generate(request template.Request) []string {
+func (pr *GenericResponder) Generate(request template.Request) []string {
 	var responses []string
 
-	amount := rand.Intn(10) + 1
+	amount := pr.Response.Amount
 
-	base, err := os.ReadFile(pr.TemplatePath)
+	base, err := os.ReadFile(pr.Response.File)
 	if err != nil {
 		panic(err)
 	}

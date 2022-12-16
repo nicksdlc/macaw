@@ -2,6 +2,7 @@ package receiver
 
 import (
 	"log"
+	"macaw/config"
 	"macaw/connectors"
 	"macaw/responder"
 	"macaw/template"
@@ -11,15 +12,15 @@ import (
 
 type RMQReceiver struct {
 	rmqConnector *connectors.RMQExchangeConnector
-	responder    *responder.PolicyResponder
+	responder    *responder.GenericResponder
 	deliveries   <-chan amqp.Delivery
 }
 
-func NewRMQReceiver(connector *connectors.RMQExchangeConnector, responsePath string) RMQReceiver {
+func NewRMQReceiver(connector *connectors.RMQExchangeConnector, resp config.Response) RMQReceiver {
 	return RMQReceiver{
 		rmqConnector: connector,
-		responder: &responder.PolicyResponder{
-			TemplatePath: responsePath,
+		responder: &responder.GenericResponder{
+			Response: resp,
 		},
 	}
 }
