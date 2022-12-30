@@ -27,7 +27,7 @@ func newNumber() Type {
 }
 
 func (an *AnyNumber) Value() string {
-	return fmt.Sprintf("%d", rand.Intn(1000000))
+	return fmt.Sprintf("%d", rand.Intn(10000000))
 }
 
 type IncrementalNumber struct {

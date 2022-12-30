@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"macaw/template/types"
+	"strings"
 )
 
 // Response is a response application will send to the consumer
@@ -16,11 +17,11 @@ type Response struct {
 	tmpl         *template.Template
 	placeholders map[int]types.Type
 	index        int
-	request      *Request
+	request      *IncomingRequest
 }
 
 // NewResponse ctor
-func NewResponse(base string, amount int, req *Request) Response {
+func NewResponse(base string, amount int, req *IncomingRequest) Response {
 	return Response{
 		BaseTemplate: base,
 		Amount:       amount,
@@ -47,7 +48,21 @@ func (r *Response) Create() string {
 
 // FromRequest gets the field from request
 func (r *Response) FromRequest(field string) string {
-	return fmt.Sprint(r.request.Fields[field])
+	path := strings.Split(field, "/")
+
+	intermidiate := r.request.Fields
+	for _, p := range path {
+		if val, ok := intermidiate[p]; ok {
+			if value, ok := val.(map[string]interface{}); ok {
+				intermidiate = value
+				continue
+			}
+			return fmt.Sprint(val)
+		}
+
+	}
+
+	return "UNDEFINED"
 }
 
 // Number Represents number in template

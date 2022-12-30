@@ -69,3 +69,17 @@ func TestShouldReplaceFromRequset(t *testing.T) {
 	assert.Contains(t, result, "incremental: 1")
 	assert.Contains(t, result, "request: 123")
 }
+
+func TestShouldReplaceFromRequsetWithHierarchy(t *testing.T) {
+	req := Serialize([]byte(`{ "payload": {"id": 123, "field":"test"}, "task": "DoSomething" }`))
+	resp := NewResponse(
+		`{
+			incremental: {{.Number "incremental"}},
+			request: {{.FromRequest "payload/field"}}
+		}`, 1, &req)
+
+	result := resp.Create()
+
+	assert.Contains(t, result, "incremental: 1")
+	assert.Contains(t, result, "request: test")
+}

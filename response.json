@@ -4,7 +4,7 @@
     "status": "Success",
     "reason": "Retrieved",
     "requestId": {{.FromRequest "requestId"}},
-    "policyEventTimeUtc": "{{.FromRequest "eventTimeUtc"}}",
+    "requestEventTimeUtc": "{{.FromRequest "eventTimeUtc"}}",
     "bulkId": {{.Number "incremental"}},
     "bulksCount": {{.Amount}} 
     "data": {

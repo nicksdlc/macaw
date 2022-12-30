@@ -8,6 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+// RMQExchangeConnector connector to RabbitMQ
 type RMQExchangeConnector struct {
 	ConnectionString string
 	Exchange         string
@@ -38,13 +39,17 @@ func NewRMQExchangeConnector(connectionString, exchange string, queue ...string)
 	rc.receiveChannel, err = rc.connection.Channel()
 	failOnError(err, "Failed to open a channel")
 
+	args := make(amqp.Table)
+	args["x-message-ttl"] = int32(86400000)
+	args["x-queue-mode"] = "lazy"
+
 	rc.inQ, err = rc.sendChannel.QueueDeclare(
 		queue[0], // name
 		true,     // durable
 		false,    // delete when unused
 		false,    // exclusive
 		false,    // no-wait
-		nil,      // arguments
+		args,     // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -54,7 +59,7 @@ func NewRMQExchangeConnector(connectionString, exchange string, queue ...string)
 		false,    // delete when unused
 		false,    // exclusive
 		false,    // no-wait
-		nil,      // arguments
+		args,     // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -75,16 +80,16 @@ func (rc *RMQExchangeConnector) Post(body string) {
 	defer cancel()
 
 	err := rc.receiveChannel.PublishWithContext(ctx,
-		rc.Exchange,  // exchange
-		rc.outQ.Name, // routing key
-		false,        // mandatory
-		false,        // immediate
+		rc.Exchange, // exchange
+		"",          // routing key
+		false,       // mandatory
+		false,       // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        []byte(body),
 		})
 	failOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", body)
+	log.Printf(" [x] Sent %s to exchange %s\n", body, rc.Exchange)
 }
 
 func (rc *RMQExchangeConnector) PostIn(body string) {
