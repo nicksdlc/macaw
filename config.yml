@@ -4,9 +4,14 @@ Rabbit:
   Port: 5672
   User: guest
   Password: guest
+  ResponseExchange: q.response
   RequestQueue: q.retrieval
   ResponseQueue: q.response
-Mode: responder
+Mode: sender #responder
 Response:
   File: ./response_short.json
   Amount: 1
+Request:
+  File: ./request.json
+  Delay: 0
+  Amount: 1000000

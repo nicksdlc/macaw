@@ -6,24 +6,37 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Configuration of the macaw
 type Configuration struct {
 	Mock     string
 	Rabbit   RabbitMQ
+	Mode     string
 	Response Response
+	Request  Request
 }
 
+// RabbitMQ configuration of RabbitMQ
 type RabbitMQ struct {
-	Host          string
-	Port          string
-	User          string
-	Password      string
-	RequestQueue  string
-	ResponseQueue string
+	Host             string
+	Port             string
+	User             string
+	Password         string
+	ResponseExchange string
+	RequestQueue     string
+	ResponseQueue    string
 }
 
+// Response configuration
 type Response struct {
 	File   string
 	Amount int
+}
+
+// Request configuration
+type Request struct {
+	File   string
+	Amount int
+	Delay  int
 }
 
 // Read configuration from file

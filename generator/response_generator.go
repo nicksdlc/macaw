@@ -1,4 +1,4 @@
-package responder
+package generator
 
 import (
 	"macaw/config"
@@ -9,7 +9,7 @@ import (
 
 // Responder generates responses
 type Responder interface {
-	Generate(request data.Request) []data.Response
+	Generate(request data.Request) []string
 }
 
 // GenericResponder generates policy responses
@@ -17,8 +17,8 @@ type GenericResponder struct {
 	Response config.Response
 }
 
-// Generate creates a random amount of
-func (pr *GenericResponder) Generate(request template.Request) []string {
+// Generate creates a slive of responses
+func (pr *GenericResponder) Generate(request template.IncomingRequest) []string {
 	var responses []string
 
 	amount := pr.Response.Amount
