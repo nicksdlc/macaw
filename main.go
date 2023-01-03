@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"macaw/config"
-	"macaw/connectors"
-	"macaw/receiver"
-	"macaw/sender"
+
+	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/connectors"
+	"github.com/nicksdlc/macaw/receiver"
+	"github.com/nicksdlc/macaw/sender"
 )
 
 func main() {

@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"html/template"
 	"log"
-	"macaw/template/types"
+
+	"github.com/nicksdlc/macaw/template/types"
 )
 
 // Request is a request macaw will send to the consumer

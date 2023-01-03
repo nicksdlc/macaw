@@ -2,10 +2,11 @@ package receiver
 
 import (
 	"log"
-	"macaw/config"
-	"macaw/connectors"
-	"macaw/generator"
-	"macaw/template"
+
+	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/connectors"
+	"github.com/nicksdlc/macaw/generator"
+	"github.com/nicksdlc/macaw/template"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
