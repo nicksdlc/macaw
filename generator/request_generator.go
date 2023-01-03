@@ -1,9 +1,10 @@
 package generator
 
 import (
-	"macaw/config"
-	"macaw/template"
 	"os"
+
+	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/template"
 )
 
 // Requester interface to generates requests

@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"macaw/template/types"
 	"strings"
+
+	"github.com/nicksdlc/macaw/template/types"
 )
 
 // Response is a response application will send to the consumer

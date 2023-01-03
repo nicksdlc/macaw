@@ -1,10 +1,11 @@
 package generator
 
 import (
-	"macaw/config"
-	"macaw/data"
-	"macaw/template"
 	"os"
+
+	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/data"
+	"github.com/nicksdlc/macaw/template"
 )
 
 // Responder generates responses

@@ -1,4 +1,4 @@
-module macaw
+module github.com/nicksdlc/macaw
 
 go 1.19
 

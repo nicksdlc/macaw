@@ -1,10 +1,11 @@
 package sender
 
 import (
-	"macaw/config"
-	"macaw/connectors"
-	"macaw/generator"
 	"time"
+
+	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/connectors"
+	"github.com/nicksdlc/macaw/generator"
 )
 
 // RMQSender sends messages to rabbitmq
