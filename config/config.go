@@ -24,6 +24,7 @@ type RabbitMQ struct {
 	ResponseExchange string
 	RequestQueue     string
 	ResponseQueue    string
+	ConnectionRetry  Retry
 }
 
 // Response configuration
@@ -37,6 +38,12 @@ type Request struct {
 	File   string
 	Amount int
 	Delay  int
+}
+
+// Retry represents how many retries to do and with which interval
+type Retry struct {
+	ElapsedTime int
+	Interval    int
 }
 
 // Read configuration from file
