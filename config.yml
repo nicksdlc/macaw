@@ -6,4 +6,14 @@ Rabbit:
   Password: guest
   RequestQueue: q.retrieval
   ResponseQueue: q.response
-ResponseTemplate: ./response_short.json
+  ConnectionRetry:
+    ElapsedTime: 2
+    Interval: 20
+Mode: responder
+Response:
+  File: ./response_test.json
+  Amount: 1
+Request:
+  File: ./request.json
+  Delay: 0
+  Amount: 1000000

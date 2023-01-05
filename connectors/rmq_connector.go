@@ -3,15 +3,18 @@ package connectors
 import (
 	"context"
 	"log"
+	"macaw/config"
 	"time"
 
+	"github.com/cenkalti/backoff"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RMQExchangeConnector struct {
-	ConnectionString string
-	Exchange         string
-	Queues           []string
+	ConnectionString  string
+	Exchange          string
+	Queues            []string
+	ConnectionRetries config.Retry
 
 	sendChannel    *amqp.Channel
 	receiveChannel *amqp.Channel
@@ -21,15 +24,28 @@ type RMQExchangeConnector struct {
 }
 
 // NewRMQExchangeConnector creates new connector with default connection
-func NewRMQExchangeConnector(connectionString, exchange string, queue ...string) *RMQExchangeConnector {
+func NewRMQExchangeConnector(connectionString string, retries config.Retry, exchange string, queue ...string) *RMQExchangeConnector {
 	rc := &RMQExchangeConnector{
-		ConnectionString: connectionString,
-		Exchange:         exchange,
-		Queues:           queue,
+		ConnectionString:  connectionString,
+		Exchange:          exchange,
+		Queues:            queue,
+		ConnectionRetries: retries,
 	}
 
 	var err error
-	rc.connection, err = amqp.Dial(connectionString)
+	operation := func() error {
+		rc.connection, err = amqp.Dial(connectionString)
+		if err != nil {
+			log.Printf("Not able to connect to rabbit error: %s", err.Error())
+		}
+		return err
+	}
+
+	backoffPolicy := backoff.NewExponentialBackOff()
+	backoffPolicy.MaxInterval = time.Duration(rc.ConnectionRetries.Interval) * time.Second
+	backoffPolicy.MaxElapsedTime = time.Duration(rc.ConnectionRetries.ElapsedTime) * time.Minute
+
+	err = backoff.Retry(operation, backoffPolicy)
 	failOnError(err, "Failed to connect to RabbitMQ")
 
 	rc.sendChannel, err = rc.connection.Channel()

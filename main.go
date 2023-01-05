@@ -14,7 +14,7 @@ func main() {
 	cfg := readConfig()
 
 	rmqConnectionString := fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.Rabbit.User, cfg.Rabbit.Password, cfg.Rabbit.Host, cfg.Rabbit.Port)
-	rc := connectors.NewRMQExchangeConnector(rmqConnectionString, "", cfg.Rabbit.RequestQueue, cfg.Rabbit.ResponseQueue)
+	rc := connectors.NewRMQExchangeConnector(rmqConnectionString, cfg.Rabbit.ConnectionRetry, cfg.Rabbit.ResponseExchange, cfg.Rabbit.RequestQueue, cfg.Rabbit.ResponseQueue)
 	defer rc.Close()
 
 	listener := receiver.NewRMQReceiver(rc, cfg.ResponseTemplate)
