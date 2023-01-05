@@ -7,7 +7,10 @@ Rabbit:
   ResponseExchange: q.response
   RequestQueue: q.retrieval
   ResponseQueue: q.response
-Mode: sender #responder
+  ConnectionRetry:
+    ElapsedTime: 2
+    Interval: 20
+Mode: receiver
 Response:
   File: ./response_short.json
   Amount: 1
