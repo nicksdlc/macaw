@@ -80,6 +80,7 @@ func NewRMQExchangeConnector(connectionString string, retries config.Retry, exch
 	return rc
 }
 
+// Close closes connection to RMQ
 func (rc *RMQExchangeConnector) Close() error {
 	err := rc.sendChannel.Close()
 	if err != nil {
@@ -89,7 +90,8 @@ func (rc *RMQExchangeConnector) Close() error {
 	return rc.connection.Close()
 }
 
-func (rc *RMQExchangeConnector) Post(body string) {
+// Post sends request to exchange
+func (rc *RMQExchangeConnector) Post(body string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -102,8 +104,13 @@ func (rc *RMQExchangeConnector) Post(body string) {
 			ContentType: "application/json",
 			Body:        []byte(body),
 		})
-	failOnError(err, "Failed to publish a message")
+
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to publish a message", err)
+		return err
+	}
 	log.Printf(" [x] Sent %s to exchange %s\n", body, rc.Exchange)
+	return nil
 }
 
 func (rc *RMQExchangeConnector) PostIn(body string) {

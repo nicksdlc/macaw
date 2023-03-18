@@ -6,9 +6,9 @@ import (
 	"github.com/nicksdlc/macaw/generator"
 )
 
-// NewRMQSender constructor
-func NewRMQSender(connector *connectors.RMQExchangeConnector, request config.Request) MessageSender {
-	return MessageSender{
+// NewHTTPSender creates new MessageSender
+func NewHTTPSender(connector *connectors.HTTPConnector, request config.Request) *MessageSender {
+	return &MessageSender{
 		connector: connector,
 		requester: &generator.JSONRequester{
 			Request: request,
