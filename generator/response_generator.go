@@ -4,13 +4,12 @@ import (
 	"os"
 
 	"github.com/nicksdlc/macaw/config"
-	"github.com/nicksdlc/macaw/data"
 	"github.com/nicksdlc/macaw/template"
 )
 
 // Responder generates responses
 type Responder interface {
-	Generate(request data.Request) []string
+	Generate(request template.IncomingRequest) []string
 }
 
 // GenericResponder generates policy responses
