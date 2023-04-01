@@ -1,4 +1,4 @@
-package connectors
+package communicators
 
 import (
 	"context"
@@ -7,11 +7,12 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/model"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-// RMQExchangeConnector connector to RabbitMQ
-type RMQExchangeConnector struct {
+// RMQExchangeCommunicator communicator to RabbitMQ
+type RMQExchangeCommunicator struct {
 	ConnectionString  string
 	Exchange          string
 	Queues            []string
@@ -24,9 +25,9 @@ type RMQExchangeConnector struct {
 	outQ           amqp.Queue
 }
 
-// NewRMQExchangeConnector creates new connector with default connection
-func NewRMQExchangeConnector(connectionString string, retries config.Retry, exchange string, queue ...string) *RMQExchangeConnector {
-	rc := &RMQExchangeConnector{
+// NewRMQExchangeCommunicator creates new communicator with default connection
+func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, exchange string, queue ...string) *RMQExchangeCommunicator {
+	rc := &RMQExchangeCommunicator{
 		ConnectionString:  connectionString,
 		Exchange:          exchange,
 		Queues:            queue,
@@ -81,7 +82,7 @@ func NewRMQExchangeConnector(connectionString string, retries config.Retry, exch
 }
 
 // Close closes connection to RMQ
-func (rc *RMQExchangeConnector) Close() error {
+func (rc *RMQExchangeCommunicator) Close() error {
 	err := rc.sendChannel.Close()
 	if err != nil {
 		return err
@@ -91,7 +92,7 @@ func (rc *RMQExchangeConnector) Close() error {
 }
 
 // Post sends request to exchange
-func (rc *RMQExchangeConnector) Post(body string) error {
+func (rc *RMQExchangeCommunicator) Post(body model.RequestMessage) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -102,7 +103,7 @@ func (rc *RMQExchangeConnector) Post(body string) error {
 		false,       // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body:        []byte(body),
+			Body:        body.Body,
 		})
 
 	if err != nil {
@@ -113,7 +114,8 @@ func (rc *RMQExchangeConnector) Post(body string) error {
 	return nil
 }
 
-func (rc *RMQExchangeConnector) PostIn(body string) {
+// PostIn might be soon deleted, un-used
+func (rc *RMQExchangeCommunicator) PostIn(body string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -130,8 +132,10 @@ func (rc *RMQExchangeConnector) PostIn(body string) {
 	log.Printf(" [x] Sent %s\n", body)
 }
 
-func (rc *RMQExchangeConnector) Consume() <-chan amqp.Delivery {
-	msgs, err := rc.sendChannel.Consume(
+// Consume opens a channel to wait for the information from rabbit mq
+func (rc *RMQExchangeCommunicator) Consume() <-chan model.RequestMessage {
+
+	amqpMsgs, err := rc.sendChannel.Consume(
 		rc.inQ.Name, // queue
 		"",          // consumer
 		true,        // auto-ack
@@ -142,7 +146,48 @@ func (rc *RMQExchangeConnector) Consume() <-chan amqp.Delivery {
 	)
 	failOnError(err, "Failed to register a consumer")
 
+	msgs := make(chan model.RequestMessage)
+	go func() {
+		for delivery := range amqpMsgs {
+			msgs <- model.RequestMessage{
+				Body: delivery.Body,
+			}
+		}
+	}()
+
 	return msgs
+}
+
+// ConsumeMediateReply opens a channel to wait for the information from rabbit mq
+func (rc *RMQExchangeCommunicator) ConsumeMediateReply(mediators []model.Mediator) {
+
+	amqpMsgs, err := rc.sendChannel.Consume(
+		rc.inQ.Name, // queue
+		"",          // consumer
+		true,        // auto-ack
+		false,       // exclusive
+		false,       // no-local
+		false,       // no-wait
+		nil,         // args
+	)
+	failOnError(err, "Failed to register a consumer")
+
+	go func() {
+		for delivery := range amqpMsgs {
+			message := model.RequestMessage{
+				Body: delivery.Body,
+			}
+
+			resp := model.ResponseMessage{}
+			for _, mediator := range mediators {
+				resp, _ = mediator(message, resp)
+			}
+
+			for _, msg := range resp.Responses {
+				rc.Post(model.RequestMessage{Body: []byte(msg)})
+			}
+		}
+	}()
 }
 
 func failOnError(err error, msg string) {

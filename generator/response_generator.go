@@ -14,19 +14,20 @@ type Responder interface {
 
 // GenericResponder generates policy responses
 type GenericResponder struct {
-	Response config.Response
+	Response     config.Response
+	RespTemplate string
 }
 
-// Generate creates a slive of responses
+// Generate creates a slice of responses
 func (pr *GenericResponder) Generate(request template.IncomingRequest) []string {
 	var responses []string
-
 	amount := pr.Response.Amount
 
-	base, err := os.ReadFile(pr.Response.File)
-	if err != nil {
-		panic(err)
+	if pr.RespTemplate == "" {
+		pr.RespTemplate = string(pr.readResponseTemplate())
 	}
+	base := pr.RespTemplate
+
 	response := template.NewResponse(string(base), amount, &request)
 
 	for i := 0; i < amount; i++ {
@@ -34,4 +35,12 @@ func (pr *GenericResponder) Generate(request template.IncomingRequest) []string 
 	}
 
 	return responses
+}
+
+func (pr *GenericResponder) readResponseTemplate() []byte {
+	base, err := os.ReadFile(pr.Response.File)
+	if err != nil {
+		panic(err)
+	}
+	return base
 }

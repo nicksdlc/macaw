@@ -1,0 +1,21 @@
+Mock: RabbitMQ # How to name it?
+Rabbit:
+  Host: localhost
+  Port: 5672
+  User: guest
+  Password: guest
+  ResponseExchange: q.response
+  RequestQueue: q.retrieval
+  ResponseQueue: q.response
+  ConnectionRetry:
+    ElapsedTime: 2
+    Interval: 20
+Mode: receiver
+Response:
+  # Resp1: For POST request with policyID = 2 respond with file responseFailed.json
+  File: ./response_short.json
+  Amount: 10
+Request:
+  File: ./request.json
+  Delay: 0
+  Amount: 1

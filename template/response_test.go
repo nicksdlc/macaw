@@ -57,7 +57,7 @@ func TestShouldReplaceWithCorrectAmount(t *testing.T) {
 }
 
 func TestShouldReplaceFromRequset(t *testing.T) {
-	req := Serialize([]byte(`{ "id": 123, "task": "DoSomething" }`))
+	req := Serialize(nil, []byte(`{ "id": 123, "task": "DoSomething" }`))
 	resp := NewResponse(
 		`{
 			incremental: {{.Number "incremental"}},
@@ -71,7 +71,7 @@ func TestShouldReplaceFromRequset(t *testing.T) {
 }
 
 func TestShouldReplaceFromRequsetWithHierarchy(t *testing.T) {
-	req := Serialize([]byte(`{ "payload": {"id": 123, "field":"test"}, "task": "DoSomething" }`))
+	req := Serialize(nil, []byte(`{ "payload": {"id": 123, "field":"test"}, "task": "DoSomething" }`))
 	resp := NewResponse(
 		`{
 			incremental: {{.Number "incremental"}},
