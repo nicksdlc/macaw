@@ -10,6 +10,7 @@ import (
 type Configuration struct {
 	Mock     string
 	Rabbit   RabbitMQ
+	HTTP     HTTP
 	Mode     string
 	Response Response
 	Request  Request
@@ -25,6 +26,12 @@ type RabbitMQ struct {
 	RequestQueue     string
 	ResponseQueue    string
 	ConnectionRetry  Retry
+}
+
+// HTTP represents HTTP server configuration
+type HTTP struct {
+	Host string
+	Port uint16
 }
 
 // Response configuration
@@ -46,9 +53,9 @@ type Retry struct {
 	Interval    int
 }
 
-// Read configuration from file
-func Read() Configuration {
-	viper.SetConfigName("config")
+// Read configuration from file in the same directory as executable
+func Read(name string) Configuration {
+	viper.SetConfigName(name)
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yml")
 	var configuration Configuration

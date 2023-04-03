@@ -11,6 +11,11 @@ import (
 )
 
 // Response is a response application will send to the consumer
+//
+//	Response is generated based on the incomint request and on the go template
+//	All the names starting from "FromRequest" are the names of the functions in the template
+//	If go template engine meets such a function in the text of the BaseTemplate it will
+//	use the code of the function to fill it with relevant value
 type Response struct {
 	BaseTemplate string
 	Amount       int
@@ -61,6 +66,15 @@ func (r *Response) FromRequest(field string) string {
 			return fmt.Sprint(val)
 		}
 
+	}
+
+	return "UNDEFINED"
+}
+
+// FromRequestHeaders gets the field values from request headers if those present
+func (r *Response) FromRequestHeaders(field string) string {
+	if val, ok := r.request.Headers[field]; ok {
+		return val
 	}
 
 	return "UNDEFINED"

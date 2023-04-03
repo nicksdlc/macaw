@@ -1,18 +1,11 @@
-Mock: RabbitMQ
-Rabbit:
-  Host: localhost
-  Port: 5672
-  User: guest
-  Password: guest
-  ResponseExchange: q.response
-  RequestQueue: q.retrieval
-  ResponseQueue: q.response
-  ConnectionRetry:
-    ElapsedTime: 2
-    Interval: 20
+Mock: HTTP # TODO: How to name it?
+HTTP:
+  Host: /test
+  Port: 1234
 Mode: receiver
 Response:
-  File: ./response_short.json
+  # Resp1: For POST request with policyID = 2 respond with file responseFailed.json
+  File: ./response_short_http.json
   Amount: 1
 Request:
   File: ./request.json

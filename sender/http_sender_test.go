@@ -9,8 +9,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/nicksdlc/macaw/communicators"
 	"github.com/nicksdlc/macaw/config"
-	"github.com/nicksdlc/macaw/connectors"
 )
 
 func TestSendSimplePostMessage(t *testing.T) {
@@ -27,7 +27,7 @@ func TestSendSimplePostMessage(t *testing.T) {
 	server := httptest.NewServer(createHandler(http.StatusOK, req))
 	defer server.Close()
 
-	sender := prepateSender(file, server)
+	sender := prepareSender(file, server)
 
 	err = sender.Send()
 	if err != nil {
@@ -49,7 +49,7 @@ func TestRecievedServerError(t *testing.T) {
 	server := httptest.NewServer(createHandler(http.StatusInternalServerError, req))
 	defer server.Close()
 
-	sender := prepateSender(file, server)
+	sender := prepareSender(file, server)
 
 	err = sender.Send()
 	if err == nil {
@@ -57,15 +57,15 @@ func TestRecievedServerError(t *testing.T) {
 	}
 }
 
-func prepateSender(file *os.File, server *httptest.Server) *MessageSender {
+func prepareSender(file *os.File, server *httptest.Server) *MessageSender {
 	sendRequest := config.Request{
 		File:   file.Name(),
 		Amount: 1,
 		Delay:  1,
 	}
 
-	connector := connectors.NewHTTPConnector(server.URL, "POST", server.Client())
-	sender := NewHTTPSender(&connector, sendRequest)
+	communicator := communicators.NewHTTPCommunicator(server.URL, 0, server.Client())
+	sender := NewMessageSender(communicator, sendRequest)
 	return sender
 }
 
