@@ -5,25 +5,46 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 
+	"github.com/nicksdlc/macaw/config"
 	"github.com/nicksdlc/macaw/model"
 )
 
 // HTTPCommunicator is a communicator to provide http infrastructure for the
 type HTTPCommunicator struct {
-	endpoint   string
-	port       uint16
-	httpClient *http.Client
+	serveEndpoint   string
+	port            uint16
+	httpClient      *http.Client
+	responseHandler map[string]func(w http.ResponseWriter, r *http.Request)
 }
 
 // NewHTTPCommunicator creates new communicator to send requests
 func NewHTTPCommunicator(endpoint string, port uint16, client *http.Client) *HTTPCommunicator {
 	return &HTTPCommunicator{
-		endpoint:   endpoint,
-		port:       port,
-		httpClient: client,
+		serveEndpoint: endpoint,
+		port:          port,
+		httpClient:    client,
+	}
+}
+
+// RespondWith sets the response handler
+func (m *HTTPCommunicator) RespondWith(response config.Response, mediators []model.Mediator) {
+	m.responseHandler = make(map[string]func(w http.ResponseWriter, r *http.Request))
+
+	m.responseHandler[response.ResponseRequest.To] = func(w http.ResponseWriter, r *http.Request) {
+		message := model.RequestMessage{
+			Body:    getRequestBody(r),
+			Headers: getQueryParams(r.URL),
+		}
+
+		resp := model.ResponseMessage{}
+		for _, mediator := range mediators {
+			resp, _ = mediator(message, resp)
+		}
+		io.WriteString(w, resp.Responses[0])
 	}
 }
 
@@ -63,7 +84,7 @@ func (m *HTTPCommunicator) Consume() <-chan model.RequestMessage {
 func (m *HTTPCommunicator) ConsumeMediateReply(mediators []model.Mediator) {
 	go func() {
 		mux := http.NewServeMux()
-		mux.HandleFunc(m.endpoint, func(w http.ResponseWriter, r *http.Request) {
+		mux.HandleFunc(m.serveEndpoint, func(w http.ResponseWriter, r *http.Request) {
 			message := model.RequestMessage{
 				Body:    getRequestBody(r),
 				Headers: getQueryParams(r.URL),
@@ -80,19 +101,32 @@ func (m *HTTPCommunicator) ConsumeMediateReply(mediators []model.Mediator) {
 	}()
 }
 
+// ConsumeMediateReplyWithResponse listens as a server and consumes sends messages to the channel
+func (m *HTTPCommunicator) ConsumeMediateReplyWithResponse() {
+	go func() {
+		mux := http.NewServeMux()
+		for endpoint, handler := range m.responseHandler {
+			log.Printf("Listening on endpoint: %s", endpoint)
+			mux.HandleFunc(endpoint, handler)
+		}
+		http.ListenAndServe(fmt.Sprintf(":%d", m.port), mux)
+	}()
+
+}
+
 func (m HTTPCommunicator) sendRequest(body string) (*http.Response, error) {
 	resourceBytes, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := m.httpClient.Post(m.endpoint, "application/json", bytes.NewBuffer(resourceBytes))
+	response, err := m.httpClient.Post(m.serveEndpoint, "application/json", bytes.NewBuffer(resourceBytes))
 	if err != nil {
 		return nil, err
 	}
 
 	if response.StatusCode >= 500 {
-		return nil, fmt.Errorf("Internal Server Error")
+		return nil, fmt.Errorf("internal Server Error")
 	}
 
 	return response, nil

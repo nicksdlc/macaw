@@ -38,6 +38,6 @@ func (h *MessageResponder) Listen() {
 		response.Responses = h.responder.Generate(template.Serialize(message.Headers, message.Body))
 		return response, nil
 	})
-
-	h.communicator.ConsumeMediateReply(mediators)
+	h.communicator.RespondWith(h.responder.Response, mediators)
+	h.communicator.ConsumeMediateReplyWithResponse()
 }

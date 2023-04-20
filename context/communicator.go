@@ -20,9 +20,9 @@ func init() {
 
 // BuildCommunicator is a factory to build the communicator for the context
 func BuildCommunicator(cfg *config.Configuration) (communicators.Communicator, error) {
-	builder, ok := communicatorBuilders[cfg.Mock]
+	builder, ok := communicatorBuilders[cfg.ConnectThrough]
 	if !ok {
-		return nil, fmt.Errorf("Not supported protocol to mock")
+		return nil, fmt.Errorf("not supported protocol to mock")
 	}
 
 	return builder(cfg)
@@ -32,7 +32,7 @@ func buildHTTPCommunicator(cfg *config.Configuration) (communicators.Communicato
 	if cfg.HTTP == (config.HTTP{}) {
 		return nil, fmt.Errorf("communicator configuration is missing")
 	}
-	return communicators.NewHTTPCommunicator(cfg.HTTP.Host, cfg.HTTP.Port, nil), nil
+	return communicators.NewHTTPCommunicator(cfg.HTTP.Serve.Host, cfg.HTTP.Serve.Port, nil), nil
 }
 
 func buildRMQCommunicator(cfg *config.Configuration) (communicators.Communicator, error) {

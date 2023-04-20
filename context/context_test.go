@@ -17,7 +17,7 @@ func TestShouldReturnErrIfNoMockMentioned(t *testing.T) {
 
 func TestShouldReturnErrIfNotSupportedProtocolProvided(t *testing.T) {
 	cfg := config.Configuration{
-		Mock: "NOT_SUPPORTED",
+		ConnectThrough: "NOT_SUPPORTED",
 	}
 
 	_, err := BuildContext(cfg)
@@ -27,10 +27,22 @@ func TestShouldReturnErrIfNotSupportedProtocolProvided(t *testing.T) {
 
 func TestShouldReturnErrIfNocommunicatorConfigurationProvided(t *testing.T) {
 	cfg := config.Configuration{
-		Mock: "HTTP",
+		ConnectThrough: "HTTP",
 	}
 
 	_, err := BuildContext(cfg)
 
 	assert.Error(t, err, "communicator configuration is missing")
+}
+
+func TestShouldReturnErrIfNoEndpointProvided(t *testing.T) {
+	cfg := config.Configuration{
+		ConnectThrough: "HTTP",
+		HTTP:           config.HTTP{},
+	}
+
+	_, err := BuildContext(cfg)
+
+	assert.Error(t, err, "Endpoint is not defined")
+	assert.Equal(t, "communicator configuration is missing", err.Error())
 }

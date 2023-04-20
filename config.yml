@@ -1,9 +1,14 @@
-Mock: HTTP # TODO: How to name it?
+ConnectThrough: HTTP
 HTTP:
-  Host: /test
-  Port: 1234
+  Serve: 
+    Host: /test
+    Port: 1234
 Mode: receiver
 Response:
+  Request:
+    To: "/test"
+    Field: 
+      Name: "requestID"
   # Resp1: For POST request with policyID = 2 respond with file responseFailed.json
   File: ./response_short_http.json
   Amount: 1
