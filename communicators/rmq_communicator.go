@@ -18,6 +18,8 @@ type RMQExchangeCommunicator struct {
 	Queues            []string
 	ConnectionRetries config.Retry
 
+	mediators []model.Mediator
+
 	sendChannel    *amqp.Channel
 	receiveChannel *amqp.Channel
 	connection     *amqp.Connection
@@ -79,6 +81,11 @@ func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, e
 	failOnError(err, "Failed to declare a queue")
 
 	return rc
+}
+
+// RespondWith defines responses to be sent to RMQ
+func (rc *RMQExchangeCommunicator) RespondWith(response config.Response, mediators []model.Mediator) {
+	rc.mediators = mediators
 }
 
 // Close closes connection to RMQ
@@ -188,6 +195,11 @@ func (rc *RMQExchangeCommunicator) ConsumeMediateReply(mediators []model.Mediato
 			}
 		}
 	}()
+}
+
+// ConsumeMediateReplyWithResponse opens a channel to wait for the information from rabbit mq
+func (rc *RMQExchangeCommunicator) ConsumeMediateReplyWithResponse() {
+	rc.ConsumeMediateReply(rc.mediators)
 }
 
 func failOnError(err error, msg string) {

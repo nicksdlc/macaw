@@ -23,8 +23,8 @@ func BuildContext(cfg config.Configuration) (*Context, error) {
 // Build creates a context of macaw that is able to be executed
 func (ctx *Context) Build(cfg *config.Configuration) (*Context, error) {
 	ctx.cfg = cfg
-	if ctx.cfg.Mock == "" {
-		return nil, fmt.Errorf("Mock profile is not defined")
+	if ctx.cfg.ConnectThrough == "" {
+		return nil, fmt.Errorf("connection profile is not defined")
 	}
 
 	c, err := BuildCommunicator(ctx.cfg)

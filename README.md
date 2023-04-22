@@ -17,7 +17,6 @@ go run main.go
 Or by building it to executable.
 
 Features:
-- Consume -> Mediate -> Send (something event based??)
 - Macaw metalang
 - Fluent API for macaw to configure 
 - Full RabbitMQ protocol mock

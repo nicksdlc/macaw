@@ -19,8 +19,15 @@ func TestShouldRespondWithPreSetResponseToMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("No port is available: %s", err.Error())
 	}
+	configuredResponse := config.Response{
+		ResponseRequest: config.ResponseRequest{
+			To: "/test",
+		},
+		File:   "",
+		Amount: 1,
+	}
 
-	sut := NewMessageResponder(communicators.NewHTTPCommunicator("/test", uint16(port), nil), config.Response{Amount: 1})
+	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), configuredResponse)
 	sut.responder.RespTemplate = "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"
 	sut.Listen()
 	response, err := http.Get(fmt.Sprintf("http://localhost:%d/test?requestID=10", port))

@@ -1,0 +1,28 @@
+ConnectThrough: HTTP
+HTTP:
+  Serve:              # This is where we will host in case macaw works as a receiver
+    Host: localhost
+    Port: 1234
+    Secured: false    # Big question mark here
+  Remote:             # This is where we will send requests in case macaw works as sender
+    Host: localhost
+    Port: 4321
+    Secured: false # Big question mark here
+Mode: receiver
+Response:
+  # Build: for request with field("requestID") equals(2) respond with file("response_failed.json")
+  # Build: for request like file("request.json") on endpoint("/evaluate") respond with file("response_short.json")
+  # Build: for request on endpoint("/health") respond with content("{"status":"ok"}")
+  Request:
+    To: "/evaluate"
+    Field: 
+      Name: "requestID"
+      Value: 2
+  File: ./response_short_http.json
+  Amount: 1
+Request:
+  # Build: send request to endpoint("/application/events") with body from file("request.json")
+  File: ./request.json
+  Destination: "/application/events"
+  Delay: 0
+  Amount: 1

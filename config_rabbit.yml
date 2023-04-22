@@ -1,4 +1,4 @@
-Mock: RabbitMQ # How to name it?
+ConnectThrough: RabbitMQ
 Rabbit:
   Host: localhost
   Port: 5672

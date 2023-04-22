@@ -8,12 +8,12 @@ import (
 
 // Configuration of the macaw
 type Configuration struct {
-	Mock     string
-	Rabbit   RabbitMQ
-	HTTP     HTTP
-	Mode     string
-	Response Response
-	Request  Request
+	ConnectThrough string
+	Rabbit         RabbitMQ
+	HTTP           HTTP
+	Mode           string
+	Response       Response
+	Request        Request
 }
 
 // RabbitMQ configuration of RabbitMQ
@@ -26,18 +26,6 @@ type RabbitMQ struct {
 	RequestQueue     string
 	ResponseQueue    string
 	ConnectionRetry  Retry
-}
-
-// HTTP represents HTTP server configuration
-type HTTP struct {
-	Host string
-	Port uint16
-}
-
-// Response configuration
-type Response struct {
-	File   string
-	Amount int
 }
 
 // Request configuration
