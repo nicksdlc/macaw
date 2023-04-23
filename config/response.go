@@ -4,6 +4,7 @@ package config
 type Response struct {
 	ResponseRequest ResponseRequest `json:"request" yaml:"request" mapstructure:"request"`
 	File            string
+	String          string
 	Amount          int
 }
 

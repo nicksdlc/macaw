@@ -12,7 +12,7 @@ type Configuration struct {
 	Rabbit         RabbitMQ
 	HTTP           HTTP
 	Mode           string
-	Response       Response
+	Responses      []Response
 	Request        Request
 }
 

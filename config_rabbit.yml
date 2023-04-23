@@ -11,10 +11,12 @@ Rabbit:
     ElapsedTime: 2
     Interval: 20
 Mode: receiver
-Response:
-  # Resp1: For POST request with policyID = 2 respond with file responseFailed.json
-  File: ./response_short.json
-  Amount: 10
+Responses:
+  - Response:
+    Request:
+      To: "q.response"
+    File: ./response_short_http.json
+    Amount: 10
 Request:
   File: ./request.json
   Delay: 0
