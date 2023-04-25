@@ -29,6 +29,17 @@ func TestShouldReplaceWithRandomNumber(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestShouldReplaceWithRandomNumberBetween(t *testing.T) {
+	resp := NewResponse(
+		`{
+			number: {{.Number "between" "10" "10"}}
+		}`, 1, nil)
+
+	result := resp.Create()
+
+	assert.Contains(t, result, "number: 10")
+}
+
 func TestShouldReplaceStringTypes(t *testing.T) {
 	resp := NewResponse(`{ 
 			oneOf: {{.String "variant" "one" "another"}}
