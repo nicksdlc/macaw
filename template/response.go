@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/nicksdlc/macaw/template/types"
+	"github.com/nicksdlc/macaw/template/types/number"
 )
 
 // Response is a response application will send to the consumer
@@ -45,7 +46,7 @@ func (r *Response) Create() string {
 	var result bytes.Buffer
 	err := r.tmpl.Execute(&result, r)
 	if err != nil {
-		log.Printf(err.Error())
+		log.Print(err.Error())
 	}
 
 	r.index = 0
@@ -82,7 +83,7 @@ func (r *Response) FromRequestHeaders(field string) string {
 
 // Number Represents number in template
 func (r *Response) Number(parameters ...string) string {
-	currentIndex := r.updatePlaceholders(parameters, types.Number)
+	currentIndex := r.updatePlaceholders(parameters, number.Number)
 	return r.placeholders[currentIndex].Value()
 }
 
