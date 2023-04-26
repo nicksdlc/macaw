@@ -42,7 +42,7 @@ func runSender(communicator communicators.Communicator, cfg config.Configuration
 
 func runReceiver(communicator communicators.Communicator, cfg config.Configuration) {
 	if cfg.Mode == receiverName {
-		listener := responder.NewMessageResponder(communicator, cfg.Response)
+		listener := responder.NewMessageResponder(communicator, cfg.Responses)
 		listener.Listen()
 
 		var forever chan struct{}

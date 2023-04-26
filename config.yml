@@ -4,14 +4,20 @@ HTTP:
     Host: /test
     Port: 1234
 Mode: receiver
-Response:
-  Request:
-    To: "/test"
-    Field: 
-      Name: "requestID"
-  # Resp1: For POST request with policyID = 2 respond with file responseFailed.json
-  File: ./response_short_http.json
-  Amount: 1
+Responses:
+  - Response:
+    Request:
+      To: "/test"
+    File: ./response_short_http.json
+    Amount: 1
+  - Response:
+    Request:
+      To: "/otherTest"
+      Field: 
+        Name: "otherRequestId"
+        Value: 10
+    File: ./response_short_http_other.json
+    Amount: 1
 Request:
   File: ./request.json
   Delay: 0

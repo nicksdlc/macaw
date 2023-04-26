@@ -9,11 +9,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/nicksdlc/macaw/config"
 	"github.com/nicksdlc/macaw/model"
 )
 
-// HTTPCommunicator is a communicator to provide http infrastructure for the
+// HTTPCommunicator is a communicator used to send and receive HTTP requests
 type HTTPCommunicator struct {
 	serveEndpoint   string
 	port            uint16
@@ -31,20 +30,27 @@ func NewHTTPCommunicator(endpoint string, port uint16, client *http.Client) *HTT
 }
 
 // RespondWith sets the response handler
-func (m *HTTPCommunicator) RespondWith(response config.Response, mediators []model.Mediator) {
+func (m *HTTPCommunicator) RespondWith(responses []model.MessagePrototype) {
 	m.responseHandler = make(map[string]func(w http.ResponseWriter, r *http.Request))
 
-	m.responseHandler[response.ResponseRequest.To] = func(w http.ResponseWriter, r *http.Request) {
-		message := model.RequestMessage{
-			Body:    getRequestBody(r),
-			Headers: getQueryParams(r.URL),
-		}
+	for _, response := range responses {
+		// re-assignment is required since, if not done here - will always point to last response
+		res := response
+		m.responseHandler[response.Destination] = func(w http.ResponseWriter, r *http.Request) {
+			message := model.RequestMessage{
+				Body:    getRequestBody(r),
+				Headers: getQueryParams(r.URL),
+			}
 
-		resp := model.ResponseMessage{}
-		for _, mediator := range mediators {
-			resp, _ = mediator(message, resp)
+			resp := model.ResponseMessage{}
+			for _, mediator := range res.Mediators {
+				mediator(message, &resp)
+			}
+
+			if m.matchAny(res, message) {
+				io.WriteString(w, resp.Responses[0])
+			}
 		}
-		io.WriteString(w, resp.Responses[0])
 	}
 }
 
@@ -92,7 +98,7 @@ func (m *HTTPCommunicator) ConsumeMediateReply(mediators []model.Mediator) {
 
 			resp := model.ResponseMessage{}
 			for _, mediator := range mediators {
-				resp, _ = mediator(message, resp)
+				mediator(message, &resp)
 			}
 			io.WriteString(w, resp.Responses[0])
 		})
@@ -130,6 +136,19 @@ func (m HTTPCommunicator) sendRequest(body string) (*http.Response, error) {
 	}
 
 	return response, nil
+}
+
+func (*HTTPCommunicator) matchAny(res model.MessagePrototype, message model.RequestMessage) bool {
+	if len(res.Matcher) == 0 {
+		return true
+	}
+
+	for _, matcher := range res.Matcher {
+		if matcher.Match(message) {
+			return true
+		}
+	}
+	return false
 }
 
 func getQueryParams(url *url.URL) map[string]string {

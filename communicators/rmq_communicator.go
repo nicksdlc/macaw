@@ -37,7 +37,7 @@ func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, e
 	}
 
 	var err error
-	operation := func() error {
+	connectToRabbit := func() error {
 		rc.connection, err = amqp.Dial(connectionString)
 		if err != nil {
 			log.Printf("Not able to connect to rabbit error: %s", err.Error())
@@ -51,7 +51,7 @@ func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, e
 	backoffPolicy.MaxInterval = time.Duration(rc.ConnectionRetries.Interval) * time.Second
 	backoffPolicy.MaxElapsedTime = time.Duration(rc.ConnectionRetries.ElapsedTime) * time.Minute
 
-	err = backoff.Retry(operation, backoffPolicy)
+	err = backoff.Retry(connectToRabbit, backoffPolicy)
 	failOnError(err, "Failed to connect to RabbitMQ")
 
 	rc.sendChannel, err = rc.connection.Channel()
@@ -84,8 +84,9 @@ func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, e
 }
 
 // RespondWith defines responses to be sent to RMQ
-func (rc *RMQExchangeCommunicator) RespondWith(response config.Response, mediators []model.Mediator) {
-	rc.mediators = mediators
+func (rc *RMQExchangeCommunicator) RespondWith(response []model.MessagePrototype) {
+	// TODO: implement once we support multiple responses in RMQ
+	rc.mediators = response[0].Mediators
 }
 
 // Close closes connection to RMQ
@@ -99,7 +100,7 @@ func (rc *RMQExchangeCommunicator) Close() error {
 }
 
 // Post sends request to exchange
-func (rc *RMQExchangeCommunicator) Post(body model.RequestMessage) error {
+func (rc *RMQExchangeCommunicator) Post(message model.RequestMessage) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -110,14 +111,14 @@ func (rc *RMQExchangeCommunicator) Post(body model.RequestMessage) error {
 		false,       // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body:        body.Body,
+			Body:        message.Body,
 		})
 
 	if err != nil {
 		log.Panicf("%s: %s", "Failed to publish a message", err)
 		return err
 	}
-	log.Printf(" [x] Sent %s to exchange %s\n", body, rc.Exchange)
+	log.Printf(" [x] Sent %s to exchange %s\n", message, rc.Exchange)
 	return nil
 }
 
@@ -187,7 +188,7 @@ func (rc *RMQExchangeCommunicator) ConsumeMediateReply(mediators []model.Mediato
 
 			resp := model.ResponseMessage{}
 			for _, mediator := range mediators {
-				resp, _ = mediator(message, resp)
+				mediator(message, &resp)
 			}
 
 			for _, msg := range resp.Responses {
