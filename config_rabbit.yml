@@ -4,19 +4,37 @@ Rabbit:
   Port: 5672
   User: guest
   Password: guest
-  ResponseExchange: q.response
-  RequestQueue: q.retrieval
-  ResponseQueue: q.response
+  Exchanges: 
+    - Exchange: 
+      Name: ex.response
+      RoutingKey: "responses.#"
+  Queues: 
+    - Queue:
+      Name: q.response
+      Args:
+        - "x-message-ttl": 300000
+        - "x-queue-mode": "lazy"
+    - Queue:
+      Name: q.test
   ConnectionRetry:
     ElapsedTime: 2
     Interval: 20
 Mode: receiver
 Responses:
   - Response:
+    To: "ex.response"
     Request:
-      To: "q.response"
-    File: ./response_short_http.json
+      To: "q.retrieval"
+    File: ./response_short.json
     Amount: 10
+  - Response:
+    To: "ex.response"
+    Request:
+      To: "q.test"
+      Contains: 
+        Value: "\"systemId\": 999"
+    String: "plain response"
+    Amount: 1
 Request:
   File: ./request.json
   Delay: 0

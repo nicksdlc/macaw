@@ -10,7 +10,9 @@ type MessagePrototype struct {
 
 	Mediators []Mediator
 
-	Destination string
+	From string
+
+	To string
 
 	Matcher []Matcher
 }

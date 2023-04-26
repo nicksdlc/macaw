@@ -14,25 +14,28 @@ import (
 // RMQExchangeCommunicator communicator to RabbitMQ
 type RMQExchangeCommunicator struct {
 	ConnectionString  string
-	Exchange          string
-	Queues            []string
 	ConnectionRetries config.Retry
 
-	mediators []model.Mediator
+	responsePrototypes []model.MessagePrototype
 
 	sendChannel    *amqp.Channel
 	receiveChannel *amqp.Channel
 	connection     *amqp.Connection
-	inQ            amqp.Queue
-	outQ           amqp.Queue
+	queues         []amqp.Queue
+	exchanges      []exchange
+
+	retrierPolicy *backoff.ExponentialBackOff
+}
+
+type exchange struct {
+	name       string
+	routingKey string
 }
 
 // NewRMQExchangeCommunicator creates new communicator with default connection
-func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, exchange string, queue ...string) *RMQExchangeCommunicator {
+func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, exchanges []config.Exchange, queues []config.Queue) *RMQExchangeCommunicator {
 	rc := &RMQExchangeCommunicator{
 		ConnectionString:  connectionString,
-		Exchange:          exchange,
-		Queues:            queue,
 		ConnectionRetries: retries,
 	}
 
@@ -47,46 +50,51 @@ func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, e
 		return err
 	}
 
-	backoffPolicy := backoff.NewExponentialBackOff()
-	backoffPolicy.MaxInterval = time.Duration(rc.ConnectionRetries.Interval) * time.Second
-	backoffPolicy.MaxElapsedTime = time.Duration(rc.ConnectionRetries.ElapsedTime) * time.Minute
+	rc.retrierPolicy = backoff.NewExponentialBackOff()
+	rc.retrierPolicy.MaxInterval = time.Duration(rc.ConnectionRetries.Interval) * time.Second
+	rc.retrierPolicy.MaxElapsedTime = time.Duration(rc.ConnectionRetries.ElapsedTime) * time.Minute
 
-	err = backoff.Retry(connectToRabbit, backoffPolicy)
+	err = backoff.Retry(connectToRabbit, rc.retrierPolicy)
 	failOnError(err, "Failed to connect to RabbitMQ")
 
-	rc.sendChannel, err = rc.connection.Channel()
+	err = backoff.Retry(func() error {
+		rc.sendChannel, err = rc.connection.Channel()
+		return err
+	}, rc.retrierPolicy)
 	failOnError(err, "Failed to open a channel")
 
-	rc.receiveChannel, err = rc.connection.Channel()
+	err = backoff.Retry(func() error {
+		rc.receiveChannel, err = rc.connection.Channel()
+		return err
+	}, rc.retrierPolicy)
 	failOnError(err, "Failed to open a channel")
 
-	rc.inQ, err = rc.sendChannel.QueueDeclare(
-		queue[0], // name
-		true,     // durable
-		false,    // delete when unused
-		false,    // exclusive
-		false,    // no-wait
-		nil,      // arguments
-	)
-	failOnError(err, "Failed to declare a queue")
+	for _, queue := range queues {
+		err = backoff.Retry(func() error {
+			q, err := rc.sendChannel.QueueDeclare(
+				queue.Name, // name
+				true,       // durable
+				false,      // delete when unused
+				false,      // exclusive
+				false,      // no-wait
+				queue.Args, // arguments
+			)
+			rc.queues = append(rc.queues, q)
+			return err
+		}, rc.retrierPolicy)
+		failOnError(err, "Failed to declare a queue")
+	}
 
-	rc.outQ, err = rc.receiveChannel.QueueDeclare(
-		queue[1], // name
-		true,     // durable
-		false,    // delete when unused
-		false,    // exclusive
-		false,    // no-wait
-		nil,      // arguments
-	)
-	failOnError(err, "Failed to declare a queue")
+	for _, ex := range exchanges {
+		rc.exchanges = append(rc.exchanges, exchange{name: ex.Name, routingKey: ex.RoutingKey})
+	}
 
 	return rc
 }
 
 // RespondWith defines responses to be sent to RMQ
 func (rc *RMQExchangeCommunicator) RespondWith(response []model.MessagePrototype) {
-	// TODO: implement once we support multiple responses in RMQ
-	rc.mediators = response[0].Mediators
+	rc.responsePrototypes = response
 }
 
 // Close closes connection to RMQ
@@ -101,82 +109,48 @@ func (rc *RMQExchangeCommunicator) Close() error {
 
 // Post sends request to exchange
 func (rc *RMQExchangeCommunicator) Post(message model.RequestMessage) error {
+	return rc.post(rc.exchanges[0], message)
+}
+
+// ConsumeMediateReplyWithResponse opens a channel to wait for the information from rabbit mq
+func (rc *RMQExchangeCommunicator) ConsumeMediateReplyWithResponse() {
+	for _, prototype := range rc.responsePrototypes {
+		go rc.consume(prototype)
+	}
+}
+
+func (rc *RMQExchangeCommunicator) post(exchange exchange, message model.RequestMessage) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	err := rc.receiveChannel.PublishWithContext(ctx,
-		rc.Exchange, // exchange
-		"",          // routing key
-		false,       // mandatory
-		false,       // immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        message.Body,
-		})
-
+	err := backoff.Retry(func() error {
+		err := rc.receiveChannel.PublishWithContext(ctx,
+			exchange.name,       // exchange
+			exchange.routingKey, // routing key
+			false,               // mandatory
+			false,               // immediate
+			amqp.Publishing{
+				ContentType: "application/json",
+				Body:        message.Body,
+			})
+		return err
+	}, rc.retrierPolicy)
 	if err != nil {
 		log.Panicf("%s: %s", "Failed to publish a message", err)
 		return err
 	}
-	log.Printf(" [x] Sent %s to exchange %s\n", message, rc.Exchange)
+	log.Printf(" [x] Sent %s to exchange %s\n", message, rc.exchanges[0].name)
 	return nil
 }
 
-// PostIn might be soon deleted, un-used
-func (rc *RMQExchangeCommunicator) PostIn(body string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := rc.sendChannel.PublishWithContext(ctx,
-		rc.Exchange, // exchange
-		rc.inQ.Name, // routing key
-		false,       // mandatory
-		false,       // immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", body)
-}
-
-// Consume opens a channel to wait for the information from rabbit mq
-func (rc *RMQExchangeCommunicator) Consume() <-chan model.RequestMessage {
-
+func (rc *RMQExchangeCommunicator) consume(prototype model.MessagePrototype) {
 	amqpMsgs, err := rc.sendChannel.Consume(
-		rc.inQ.Name, // queue
-		"",          // consumer
-		true,        // auto-ack
-		false,       // exclusive
-		false,       // no-local
-		false,       // no-wait
-		nil,         // args
-	)
-	failOnError(err, "Failed to register a consumer")
-
-	msgs := make(chan model.RequestMessage)
-	go func() {
-		for delivery := range amqpMsgs {
-			msgs <- model.RequestMessage{
-				Body: delivery.Body,
-			}
-		}
-	}()
-
-	return msgs
-}
-
-// ConsumeMediateReply opens a channel to wait for the information from rabbit mq
-func (rc *RMQExchangeCommunicator) ConsumeMediateReply(mediators []model.Mediator) {
-
-	amqpMsgs, err := rc.sendChannel.Consume(
-		rc.inQ.Name, // queue
-		"",          // consumer
-		true,        // auto-ack
-		false,       // exclusive
-		false,       // no-local
-		false,       // no-wait
-		nil,         // args
+		prototype.From, // queue
+		"",             // consumer
+		true,           // auto-ack
+		false,          // exclusive
+		false,          // no-local
+		false,          // no-wait
+		nil,            // args
 	)
 	failOnError(err, "Failed to register a consumer")
 
@@ -187,20 +161,26 @@ func (rc *RMQExchangeCommunicator) ConsumeMediateReply(mediators []model.Mediato
 			}
 
 			resp := model.ResponseMessage{}
-			for _, mediator := range mediators {
+			for _, mediator := range prototype.Mediators {
 				mediator(message, &resp)
 			}
 
 			for _, msg := range resp.Responses {
-				rc.Post(model.RequestMessage{Body: []byte(msg)})
+				if matchAny(prototype, message) {
+					rc.post(rc.getExchange(prototype.To), model.RequestMessage{Body: []byte(msg)})
+				}
 			}
 		}
 	}()
 }
 
-// ConsumeMediateReplyWithResponse opens a channel to wait for the information from rabbit mq
-func (rc *RMQExchangeCommunicator) ConsumeMediateReplyWithResponse() {
-	rc.ConsumeMediateReply(rc.mediators)
+func (rc *RMQExchangeCommunicator) getExchange(name string) exchange {
+	for _, ex := range rc.exchanges {
+		if ex.name == name {
+			return ex
+		}
+	}
+	return exchange{}
 }
 
 func failOnError(err error, msg string) {

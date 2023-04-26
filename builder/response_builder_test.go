@@ -78,7 +78,7 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 }
 
 func assertPrototype(t *testing.T, name string, responsePrototype model.MessagePrototype) {
-	assert.Equal(t, name, responsePrototype.Destination)
+	assert.Equal(t, name, responsePrototype.From)
 	assert.Equal(t, name, responsePrototype.BodyTemplate)
 	assert.Equal(t, 1, len(responsePrototype.Mediators))
 	assert.Equal(t, 1, len(responsePrototype.Matcher))

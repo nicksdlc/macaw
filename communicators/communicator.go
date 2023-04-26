@@ -12,9 +12,19 @@ type Communicator interface {
 
 	Post(body model.RequestMessage) error
 
-	Consume() <-chan model.RequestMessage
-
-	ConsumeMediateReply(mediators []model.Mediator)
-
 	ConsumeMediateReplyWithResponse()
+}
+
+// Should be moved to a mediator maybe
+func matchAny(res model.MessagePrototype, message model.RequestMessage) bool {
+	if len(res.Matcher) == 0 {
+		return true
+	}
+
+	for _, matcher := range res.Matcher {
+		if matcher.Match(message) {
+			return true
+		}
+	}
+	return false
 }
