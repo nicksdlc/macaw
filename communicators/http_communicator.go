@@ -36,7 +36,7 @@ func (m *HTTPCommunicator) RespondWith(responses []model.MessagePrototype) {
 	for _, response := range responses {
 		// re-assignment is required since, if not done here - will always point to last response
 		res := response
-		m.responseHandler[response.Destination] = func(w http.ResponseWriter, r *http.Request) {
+		m.responseHandler[response.From] = func(w http.ResponseWriter, r *http.Request) {
 			message := model.RequestMessage{
 				Body:    getRequestBody(r),
 				Headers: getQueryParams(r.URL),
@@ -47,7 +47,7 @@ func (m *HTTPCommunicator) RespondWith(responses []model.MessagePrototype) {
 				mediator(message, &resp)
 			}
 
-			if m.matchAny(res, message) {
+			if matchAny(res, message) {
 				io.WriteString(w, resp.Responses[0])
 			}
 		}
@@ -79,34 +79,6 @@ func (m *HTTPCommunicator) PostWithResponse(body model.RequestMessage) (string, 
 	return buf.String(), nil
 }
 
-// Consume listens as a server and consumes sends messages to the channel
-func (m *HTTPCommunicator) Consume() <-chan model.RequestMessage {
-	msgs := make(chan model.RequestMessage)
-
-	return msgs
-}
-
-// ConsumeMediateReply listens as a server and consumes sends messages to the channel
-func (m *HTTPCommunicator) ConsumeMediateReply(mediators []model.Mediator) {
-	go func() {
-		mux := http.NewServeMux()
-		mux.HandleFunc(m.serveEndpoint, func(w http.ResponseWriter, r *http.Request) {
-			message := model.RequestMessage{
-				Body:    getRequestBody(r),
-				Headers: getQueryParams(r.URL),
-			}
-
-			resp := model.ResponseMessage{}
-			for _, mediator := range mediators {
-				mediator(message, &resp)
-			}
-			io.WriteString(w, resp.Responses[0])
-		})
-
-		http.ListenAndServe(fmt.Sprintf(":%d", m.port), mux)
-	}()
-}
-
 // ConsumeMediateReplyWithResponse listens as a server and consumes sends messages to the channel
 func (m *HTTPCommunicator) ConsumeMediateReplyWithResponse() {
 	go func() {
@@ -136,19 +108,6 @@ func (m HTTPCommunicator) sendRequest(body string) (*http.Response, error) {
 	}
 
 	return response, nil
-}
-
-func (*HTTPCommunicator) matchAny(res model.MessagePrototype, message model.RequestMessage) bool {
-	if len(res.Matcher) == 0 {
-		return true
-	}
-
-	for _, matcher := range res.Matcher {
-		if matcher.Match(message) {
-			return true
-		}
-	}
-	return false
 }
 
 func getQueryParams(url *url.URL) map[string]string {

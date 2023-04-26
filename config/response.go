@@ -2,6 +2,7 @@ package config
 
 // Response configuration
 type Response struct {
+	To              string
 	ResponseRequest ResponseRequest `json:"request" yaml:"request" mapstructure:"request"`
 	File            string
 	String          string

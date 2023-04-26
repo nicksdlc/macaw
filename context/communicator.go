@@ -7,11 +7,13 @@ import (
 	"github.com/nicksdlc/macaw/config"
 )
 
-// communicatorBuilder is a function to build communicator from configuration file
+// communicatorBuilder is a function type to build communicator from configuration file
 type communicatorBuilder func(*config.Configuration) (communicators.Communicator, error)
 
 var communicatorBuilders = make(map[string]communicatorBuilder)
 
+// init allows to register all the builders for the communicators
+// once the package is imported
 func init() {
 	communicatorBuilders["HTTP"] = buildHTTPCommunicator
 	communicatorBuilders["RabbitMQ"] = buildRMQCommunicator
@@ -36,14 +38,21 @@ func buildHTTPCommunicator(cfg *config.Configuration) (communicators.Communicato
 }
 
 func buildRMQCommunicator(cfg *config.Configuration) (communicators.Communicator, error) {
-	if cfg.Rabbit == (config.RabbitMQ{}) {
+	if !rabbitConfigIsValid(cfg) {
 		return nil, fmt.Errorf("communicator configuration is missing")
 	}
 	rmqConnectionString := fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.Rabbit.User, cfg.Rabbit.Password, cfg.Rabbit.Host, cfg.Rabbit.Port)
 	return communicators.NewRMQExchangeCommunicator(
 		rmqConnectionString,
 		cfg.Rabbit.ConnectionRetry,
-		cfg.Rabbit.ResponseExchange,
-		cfg.Rabbit.RequestQueue,
-		cfg.Rabbit.ResponseQueue), nil
+		cfg.Rabbit.Exchanges,
+		cfg.Rabbit.Queues), nil
+}
+
+func rabbitConfigIsValid(cfg *config.Configuration) bool {
+	validHost := cfg.Rabbit.Host != "" && cfg.Rabbit.Port != ""
+	validQueues := cfg.Rabbit.Queues != nil && len(cfg.Rabbit.Queues) > 0
+	validExchanges := cfg.Rabbit.Exchanges != nil && len(cfg.Rabbit.Exchanges) > 0
+
+	return validHost && validQueues && validExchanges
 }

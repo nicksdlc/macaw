@@ -16,18 +16,6 @@ type Configuration struct {
 	Request        Request
 }
 
-// RabbitMQ configuration of RabbitMQ
-type RabbitMQ struct {
-	Host             string
-	Port             string
-	User             string
-	Password         string
-	ResponseExchange string
-	RequestQueue     string
-	ResponseQueue    string
-	ConnectionRetry  Retry
-}
-
 // Request configuration
 type Request struct {
 	File   string

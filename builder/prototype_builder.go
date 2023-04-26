@@ -34,7 +34,8 @@ func (rtb *ResponsePrototypeBuilder) Build() []model.MessagePrototype {
 		templates = append(templates, model.MessagePrototype{
 			BodyTemplate: rtb.buildBodyTemplate(response),
 			Mediators:    rtb.buildMediators(response),
-			Destination:  response.ResponseRequest.To,
+			From:         response.ResponseRequest.To,
+			To:           response.To,
 			Matcher:      rtb.buildMatcher(response),
 		})
 	}
