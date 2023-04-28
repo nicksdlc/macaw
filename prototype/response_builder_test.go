@@ -1,10 +1,9 @@
-package builder
+package prototype
 
 import (
 	"testing"
 
 	"github.com/nicksdlc/macaw/config"
-	"github.com/nicksdlc/macaw/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -77,10 +76,9 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 	assertPrototype(t, "test2", responsePrototypes[1])
 }
 
-func assertPrototype(t *testing.T, name string, responsePrototype model.MessagePrototype) {
+func assertPrototype(t *testing.T, name string, responsePrototype MessagePrototype) {
 	assert.Equal(t, name, responsePrototype.From)
 	assert.Equal(t, name, responsePrototype.BodyTemplate)
-	assert.Equal(t, 1, len(responsePrototype.Mediators))
 	assert.Equal(t, 1, len(responsePrototype.Matcher))
 }
 
@@ -103,5 +101,5 @@ func TestOneMediatorCreatedForResponse(t *testing.T) {
 	responsePrototypes := NewResponsePrototypeBuilder(responseConfig).Build()
 
 	// Then
-	assert.Equal(t, 1, len(responsePrototypes[0].Mediators))
+	assert.NotNil(t, responsePrototypes[0].Mediators)
 }

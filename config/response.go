@@ -7,6 +7,7 @@ type Response struct {
 	File            string
 	String          string
 	Amount          int
+	Delay           int // Delay in milliseconds
 }
 
 // ResponseRequest configuration

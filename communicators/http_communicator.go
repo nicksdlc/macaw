@@ -10,6 +10,8 @@ import (
 	"net/url"
 
 	"github.com/nicksdlc/macaw/model"
+	"github.com/nicksdlc/macaw/prototype"
+	"github.com/nicksdlc/macaw/prototype/matchers"
 )
 
 // HTTPCommunicator is a communicator used to send and receive HTTP requests
@@ -30,7 +32,7 @@ func NewHTTPCommunicator(endpoint string, port uint16, client *http.Client) *HTT
 }
 
 // RespondWith sets the response handler
-func (m *HTTPCommunicator) RespondWith(responses []model.MessagePrototype) {
+func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 	m.responseHandler = make(map[string]func(w http.ResponseWriter, r *http.Request))
 
 	for _, response := range responses {
@@ -43,13 +45,12 @@ func (m *HTTPCommunicator) RespondWith(responses []model.MessagePrototype) {
 			}
 
 			resp := model.ResponseMessage{}
-			for _, mediator := range res.Mediators {
-				mediator(message, &resp)
+			for r := range res.Mediators.Run(message, resp) {
+				if matchers.MatchAny(res.Matcher, message) {
+					io.WriteString(w, r.Responses[0])
+				}
 			}
 
-			if matchAny(res, message) {
-				io.WriteString(w, resp.Responses[0])
-			}
 		}
 	}
 }
