@@ -1,17 +1,16 @@
-package builder
+package prototype
 
 import (
 	"os"
 
 	"github.com/nicksdlc/macaw/config"
-	"github.com/nicksdlc/macaw/generator"
-	"github.com/nicksdlc/macaw/model"
-	"github.com/nicksdlc/macaw/template"
+	"github.com/nicksdlc/macaw/mediator"
+	"github.com/nicksdlc/macaw/prototype/matchers"
 )
 
 // PrototypeBuilder builds message templates
 type PrototypeBuilder interface {
-	Build() []model.MessagePrototype
+	Build() []MessagePrototype
 }
 
 // ResponsePrototypeBuilder builds response templates
@@ -27,11 +26,11 @@ func NewResponsePrototypeBuilder(responseConfig []config.Response) *ResponseProt
 }
 
 // Build builds response templates from response configuration
-func (rtb *ResponsePrototypeBuilder) Build() []model.MessagePrototype {
-	var templates []model.MessagePrototype
+func (rtb *ResponsePrototypeBuilder) Build() []MessagePrototype {
+	var templates []MessagePrototype
 
 	for _, response := range rtb.responseConfig {
-		templates = append(templates, model.MessagePrototype{
+		templates = append(templates, MessagePrototype{
 			BodyTemplate: rtb.buildBodyTemplate(response),
 			Mediators:    rtb.buildMediators(response),
 			From:         response.ResponseRequest.To,
@@ -43,20 +42,13 @@ func (rtb *ResponsePrototypeBuilder) Build() []model.MessagePrototype {
 	return templates
 }
 
-func (rtb *ResponsePrototypeBuilder) buildMediators(responseConfig config.Response) []model.Mediator {
-	var mediators []model.Mediator
+func (rtb *ResponsePrototypeBuilder) buildMediators(response config.Response) mediator.MediatorChain {
+	var chain mediator.MediatorChain
 
-	mediators = append(mediators, func(message model.RequestMessage, response *model.ResponseMessage) error {
-		// TODO: should be moved once figure out how to do that
-		responder := &generator.GenericResponder{
-			Response:     responseConfig,
-			RespTemplate: rtb.buildBodyTemplate(responseConfig),
-		}
-		response.Responses = responder.Generate(template.Serialize(message.Headers, message.Body))
-		return nil
-	})
+	chain.Append(mediator.NewGeneratingMediator(response.Amount, rtb.buildBodyTemplate(response)))
+	chain.Append(mediator.NewDelayingMediator(response.Delay))
 
-	return mediators
+	return chain
 }
 
 func (rtb *ResponsePrototypeBuilder) buildBodyTemplate(response config.Response) string {
@@ -66,9 +58,9 @@ func (rtb *ResponsePrototypeBuilder) buildBodyTemplate(response config.Response)
 	return response.String
 }
 
-func (rtb *ResponsePrototypeBuilder) buildMatcher(response config.Response) []model.Matcher {
+func (rtb *ResponsePrototypeBuilder) buildMatcher(response config.Response) []matchers.Matcher {
 	if response.ResponseRequest.Field.Name != "" {
-		return []model.Matcher{&model.FieldMatcher{
+		return []matchers.Matcher{&matchers.FieldMatcher{
 			Field: response.ResponseRequest.Field.Name,
 			Value: response.ResponseRequest.Field.Value,
 		}}

@@ -27,6 +27,7 @@ Responses:
       To: "q.retrieval"
     File: ./response_short.json
     Amount: 10
+    Delay: 200
   - Response:
     To: "ex.response"
     Request:
