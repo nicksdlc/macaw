@@ -4,5 +4,5 @@ package model
 type ResponseMessage struct {
 	Metadata map[string]string
 
-	Responses []string
+	Response string
 }

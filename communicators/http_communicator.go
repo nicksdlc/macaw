@@ -47,7 +47,7 @@ func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 			resp := model.ResponseMessage{}
 			for r := range res.Mediators.Run(message, resp) {
 				if matchers.MatchAny(res.Matcher, message) {
-					io.WriteString(w, r.Responses[0])
+					io.WriteString(w, r.Response)
 				}
 			}
 

@@ -9,20 +9,41 @@ HTTP:
     Port: 4321
     Secured: false # Big question mark here
 Mode: receiver
-Response:
+Responses:
   # Build: for request with field("requestID") equals(2) respond with file("response_failed.json")
   # Build: for request like file("request.json") on endpoint("/evaluate") respond with file("response_short.json")
   # Build: for request on endpoint("/health") respond with content("{"status":"ok"}")
-  Request:
-    To: "/evaluate"
-    Field: 
-      Name: "requestID"
-      Value: 2
-  File: ./response_short_http.json
-  Amount: 1
+  - Response:
+    Request:
+      To: "/test"
+    File: ./response_short.json
+    Amount: 1
+    Delay: 200
+  - Response:
+    Request:
+      To: "/test/evaluate"
+      Contains: 
+        Value: "\"systemId\": 999"
+    String: "plain response"
+    Amount: 1
 Request:
+  - Request:
+    To: "/application/events"
+    File: ./request.json
+    Amount: 10
+  - Request:
+    To: "/application/register"
+    String: "{\"form\": \"test\"}"
+    Headers:
+      - Parameter:
+        Name: "Content-Type"
+        Value: "application/json"
+    Parameters: 
+      - Parameter:
+        Name: "id"
+        Value: "10"
+      - Parameter: 
+        Name: "persistent"
+        Value: "false"
+    Delay: 10000
   # Build: send request to endpoint("/application/events") with body from file("request.json")
-  File: ./request.json
-  Destination: "/application/events"
-  Delay: 0
-  Amount: 1

@@ -119,7 +119,7 @@ func (rc *RMQExchangeCommunicator) consume(messagePrototype prototype.MessagePro
 			resp := model.ResponseMessage{}
 			for r := range messagePrototype.Mediators.Run(message, resp) {
 				if matchers.MatchAny(messagePrototype.Matcher, message) {
-					rc.post(rc.getExchange(messagePrototype.To), model.RequestMessage{Body: []byte(r.Responses[0])})
+					rc.post(rc.getExchange(messagePrototype.To), model.RequestMessage{Body: []byte(r.Response)})
 				}
 			}
 		}

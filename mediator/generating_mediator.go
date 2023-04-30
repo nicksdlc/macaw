@@ -32,8 +32,8 @@ func (gm *GeneratingMediator) Mediate(message model.RequestMessage, responses <-
 			log.Printf("Generating %d responses", gm.amount)
 			for i := 0; i < gm.amount; i++ {
 				out <- model.ResponseMessage{
-					Responses: []string{bodyGenerator.Create()},
-					Metadata:  response.Metadata,
+					Response: bodyGenerator.Create(),
+					Metadata: response.Metadata,
 				}
 			}
 		}
