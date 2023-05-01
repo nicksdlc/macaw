@@ -1,7 +1,7 @@
 # macaw
 Macaw is a tool to mock remote service. It can work in "sender" and "responder" modes.
 
-In respective mode it will either send a defined amount of requests or respond to request with specified response.
+In respective mode it will either send a defined number of requests or respond to request with specified response.
 
 ## Configuration
 

@@ -21,15 +21,19 @@ type JSONRequester struct {
 func (pr *JSONRequester) Generate() []string {
 	var requests []string
 
-	amount := pr.Request.Amount
+	quantity := pr.Request.Options.Quantity
 
-	base, err := os.ReadFile(pr.Request.File)
-	if err != nil {
-		panic(err)
+	base := pr.Request.Body.String
+	if base == "" {
+		baseBytes, err := os.ReadFile(pr.Request.Body.File)
+		if err != nil {
+			panic(err)
+		}
+		base = string(baseBytes)
 	}
-	request := template.NewRequest(string(base))
+	request := template.NewRequest(base)
 
-	for i := 0; i < amount; i++ {
+	for i := 0; i < quantity; i++ {
 		requests = append(requests, request.Create())
 	}
 

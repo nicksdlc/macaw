@@ -8,17 +8,24 @@ Responses:
   - Response:
     Request:
       To: "/test"
-    File: ./response_short_http.json
-    Amount: 1
+    Body:
+      File: ./response_short_http.json
+    Options: 
+      Quantity: 1
   - Response:
     Request:
       To: "/otherTest"
-      Field: 
-        Name: "otherRequestId"
-        Value: 10
-    File: ./response_short_http_other.json
-    Amount: 1
+      Matchers:
+        Field: 
+          Name: "otherRequestId"
+          Value: 10
+    Body:
+      File: ./response_short_http_other.json
+    Options: 
+      Quantity: 1
 Request:
-  File: ./request.json
-  Delay: 0
-  Amount: 1
+  Body:
+    File: ./request.json
+  Options: 
+    Delay: 0
+    Quantity: 1

@@ -19,7 +19,7 @@ import (
 //	use the code of the function to fill it with relevant value
 type Response struct {
 	BaseTemplate string
-	Amount       int
+	Quantity     int
 
 	tmpl         *template.Template
 	placeholders map[int]types.Type
@@ -28,10 +28,10 @@ type Response struct {
 }
 
 // NewResponse ctor
-func NewResponse(base string, amount int, req *IncomingRequest) Response {
+func NewResponse(base string, quantity int, req *IncomingRequest) Response {
 	return Response{
 		BaseTemplate: base,
-		Amount:       amount,
+		Quantity:     quantity,
 		tmpl:         template.New(""),
 		placeholders: make(map[int]types.Type),
 		index:        0,
@@ -101,7 +101,7 @@ func (r *Response) Date(parameters ...string) string {
 
 // List represents list in template
 func (r *Response) List(input string, times int) string {
-	listResponse := NewResponse(input, r.Amount, r.request)
+	listResponse := NewResponse(input, r.Quantity, r.request)
 	var result string
 	for i := 0; i < times; i++ {
 		result += listResponse.Create() + "\n"

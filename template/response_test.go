@@ -56,10 +56,10 @@ func TestShouldReplaceStringTypes(t *testing.T) {
 	}
 }
 
-func TestShouldReplaceWithCorrectAmount(t *testing.T) {
+func TestShouldReplaceWithCorrectQuantity(t *testing.T) {
 	resp := NewResponse(
 		`{
-			number: {{.Amount}}
+			number: {{.Quantity}}
 		}`, 2, nil)
 
 	result := resp.Create()

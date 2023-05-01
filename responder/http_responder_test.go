@@ -24,8 +24,8 @@ func TestShouldRespondWithPreSetResponseToMessage(t *testing.T) {
 		ResponseRequest: config.ResponseRequest{
 			To: "/test",
 		},
-		String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}",
-		Amount: 1,
+		Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
+		Options: config.Options{Quantity: 1, Delay: 0},
 	}
 
 	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), []config.Response{configuredResponse})
@@ -47,13 +47,14 @@ func TestShouldNotRespondIfDoesNotMatch(t *testing.T) {
 	configuredResponse := config.Response{
 		ResponseRequest: config.ResponseRequest{
 			To: "/test",
-			Field: config.Field{
-				Name:  "requestID",
-				Value: "10",
-			},
+			Matchers: config.Matchers{
+				Field: config.FieldMatcher{
+					Name:  "requestID",
+					Value: "test",
+				}},
 		},
-		String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}",
-		Amount: 1,
+		Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
+		Options: config.Options{Quantity: 1, Delay: 0},
 	}
 
 	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), []config.Response{configuredResponse})
@@ -81,15 +82,15 @@ func TestShouldRespondToDifferntRequest(t *testing.T) {
 			ResponseRequest: config.ResponseRequest{
 				To: "/test",
 			},
-			String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}",
-			Amount: 1,
+			Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
+			Options: config.Options{Quantity: 1, Delay: 0},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "/test2",
 			},
-			String: "{\"name\": {{.FromRequestHeaders \"otherID\"}}}",
-			Amount: 1,
+			Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"otherID\"}}}"},
+			Options: config.Options{Quantity: 1, Delay: 0},
 		},
 	}
 

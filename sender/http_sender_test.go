@@ -2,11 +2,8 @@ package sender
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/nicksdlc/macaw/communicators"
@@ -15,21 +12,14 @@ import (
 
 func TestSendSimplePostMessage(t *testing.T) {
 	req := "{\"name\": \"test\"}"
-	file, err := ioutil.TempFile("", "test-*.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Remove(file.Name())
-
-	file.WriteString(req)
 
 	// Send response to be tested
 	server := httptest.NewServer(createHandler(http.StatusOK, req))
 	defer server.Close()
 
-	sender := prepareSender(file, server)
+	sender := prepareSender(req, server)
 
-	err = sender.Send()
+	err := sender.Send()
 	if err != nil {
 		t.Fatalf("expected a no error, instead got: %s", err.Error())
 	}
@@ -37,31 +27,27 @@ func TestSendSimplePostMessage(t *testing.T) {
 
 func TestRecievedServerError(t *testing.T) {
 	req := "{\"name\": \"test\"}"
-	file, err := ioutil.TempFile("", "test-*.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Remove(file.Name())
-
-	file.WriteString(req)
 
 	// Send response to be tested
 	server := httptest.NewServer(createHandler(http.StatusInternalServerError, req))
 	defer server.Close()
 
-	sender := prepareSender(file, server)
+	sender := prepareSender(req, server)
 
-	err = sender.Send()
+	err := sender.Send()
 	if err == nil {
 		t.Fatalf("expected an error, instead got: nil")
 	}
 }
 
-func prepareSender(file *os.File, server *httptest.Server) *MessageSender {
+func prepareSender(body string, server *httptest.Server) *MessageSender {
 	sendRequest := config.Request{
-		File:   file.Name(),
-		Amount: 1,
-		Delay:  1,
+		Body: config.Body{String: body},
+		To:   server.URL,
+		Options: config.Options{
+			Quantity: 1,
+			Delay:    1,
+		},
 	}
 
 	communicator := communicators.NewHTTPCommunicator(server.URL, 0, server.Client())

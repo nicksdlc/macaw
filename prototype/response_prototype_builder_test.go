@@ -24,12 +24,13 @@ func TestResponseCreatedOnValidConfigurtion(t *testing.T) {
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "test",
-				Field: config.Field{
-					Name:  "id",
-					Value: "test",
-				},
+				Matchers: config.Matchers{
+					Field: config.FieldMatcher{
+						Name:  "id",
+						Value: "test",
+					}},
 			},
-			String: "test",
+			Body: config.Body{String: "test"},
 		},
 	}
 
@@ -48,22 +49,24 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "test",
-				Field: config.Field{
-					Name:  "id",
-					Value: "test",
-				},
+				Matchers: config.Matchers{
+					Field: config.FieldMatcher{
+						Name:  "id",
+						Value: "test",
+					}},
 			},
-			String: "test",
+			Body: config.Body{String: "test"},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "test2",
-				Field: config.Field{
-					Name:  "id",
-					Value: "test2",
-				},
+				Matchers: config.Matchers{
+					Field: config.FieldMatcher{
+						Name:  "id",
+						Value: "test2",
+					}},
 			},
-			String: "test2",
+			Body: config.Body{String: "test2"},
 		},
 	}
 
@@ -88,12 +91,13 @@ func TestOneMediatorCreatedForResponse(t *testing.T) {
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "test",
-				Field: config.Field{
-					Name:  "id",
-					Value: "test",
-				},
+				Matchers: config.Matchers{
+					Field: config.FieldMatcher{
+						Name:  "id",
+						Value: "test",
+					}},
 			},
-			String: "test",
+			Body: config.Body{String: "test"},
 		},
 	}
 

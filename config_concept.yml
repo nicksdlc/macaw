@@ -16,24 +16,32 @@ Responses:
   - Response:
     Request:
       To: "/test"
-    File: ./response_short.json
-    Amount: 1
-    Delay: 200
+    Body:
+      File: ./response_short.json
+    Options:
+      Quantity: 1
+      Delay: 200
   - Response:
     Request:
       To: "/test/evaluate"
-      Contains: 
-        Value: "\"systemId\": 999"
-    String: "plain response"
-    Amount: 1
+      Matchers:
+        Contains: 
+          Value: "\"systemId\": 999"
+    Body:
+      String: "plain response"
+    Options:
+      Quantity: 1
 Request:
   - Request:
     To: "/application/events"
-    File: ./request.json
-    Amount: 10
+    Body:
+      File: ./request.json
+    Options:
+      Quantity: 10
   - Request:
     To: "/application/register"
-    String: "{\"form\": \"test\"}"
+    Body:
+      String: "{\"form\": \"test\"}"
     Headers:
       - Parameter:
         Name: "Content-Type"
@@ -45,5 +53,6 @@ Request:
       - Parameter: 
         Name: "persistent"
         Value: "false"
-    Delay: 10000
+    Options:
+      Delay: 10000
   # Build: send request to endpoint("/application/events") with body from file("request.json")
