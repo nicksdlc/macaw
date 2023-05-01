@@ -9,13 +9,13 @@ import (
 
 type GeneratingMediator struct {
 	bodyTempalte string
-	amount       int
+	quantity     int
 }
 
-func NewGeneratingMediator(amount int, bodyTempalte string) *GeneratingMediator {
+func NewGeneratingMediator(quantity int, bodyTempalte string) *GeneratingMediator {
 	return &GeneratingMediator{
 		bodyTempalte: bodyTempalte,
-		amount:       amount,
+		quantity:     quantity,
 	}
 }
 
@@ -27,10 +27,10 @@ func (gm *GeneratingMediator) Mediate(message model.RequestMessage, responses <-
 			base := gm.bodyTempalte
 			req := template.Serialize(message.Headers, message.Body)
 
-			bodyGenerator := template.NewResponse(string(base), gm.amount, &req)
+			bodyGenerator := template.NewResponse(string(base), gm.quantity, &req)
 
-			log.Printf("Generating %d responses", gm.amount)
-			for i := 0; i < gm.amount; i++ {
+			log.Printf("Generating %d responses", gm.quantity)
+			for i := 0; i < gm.quantity; i++ {
 				out <- model.ResponseMessage{
 					Response: bodyGenerator.Create(),
 					Metadata: response.Metadata,

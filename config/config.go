@@ -18,9 +18,9 @@ type Configuration struct {
 
 // Request configuration
 type Request struct {
-	File   string
-	Amount int
-	Delay  int
+	To      string
+	Body    Body
+	Options Options
 }
 
 // Retry represents how many retries to do and with which interval

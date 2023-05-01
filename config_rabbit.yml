@@ -25,18 +25,24 @@ Responses:
     To: "ex.response"
     Request:
       To: "q.retrieval"
-    File: ./response_short.json
-    Amount: 10
-    Delay: 200
+    Body:
+      File: ./response_short.json
+    Options:
+      Quantity: 10
+      Delay: 200
   - Response:
     To: "ex.response"
     Request:
       To: "q.test"
-      Contains: 
-        Value: "\"systemId\": 999"
-    String: "plain response"
-    Amount: 1
+      Matchers:
+        Contains: 
+          Value: "\"systemId\": 999"
+    Body:
+      String: "plain response"
+    Options:
+      Quantity: 1
 Request:
   File: ./request.json
-  Delay: 0
-  Amount: 1
+  Options:
+    Delay: 0
+    Quantity: 1

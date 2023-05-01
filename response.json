@@ -6,7 +6,7 @@
     "requestId": {{.FromRequest "requestId"}},
     "requestEventTimeUtc": "{{.FromRequest "eventTimeUtc"}}",
     "bulkId": {{.Number "incremental"}},
-    "bulksCount": {{.Amount}} 
+    "bulksCount": {{.Quantity}} 
     "data": {
         "fields": {{.FromRequest "requiredFields"}},
         "values": {{.List "[{{.Number}}, {{.Number}}, {{.Number}}]" 3}}

@@ -6,5 +6,5 @@
     "requestId": {{.FromRequestHeaders "requestId"}},
     "policyEventTimeUtc": "{{.FromRequest "eventTimeUtc"}}",
     "bulkId": {{.Number "incremental"}},
-    "bulksCount": {{.Amount}} 
+    "bulksCount": {{.Quantity}} 
 }

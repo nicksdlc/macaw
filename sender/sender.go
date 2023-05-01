@@ -14,7 +14,7 @@ type Sender interface {
 	Send() error
 }
 
-// MessageSender generates and sends defined amount of messages
+// MessageSender generates and sends defined quantity of messages
 type MessageSender struct {
 	communicator communicators.Communicator
 	requester    *generator.JSONRequester
@@ -37,7 +37,7 @@ func (rs *MessageSender) Send() error {
 		if err != nil {
 			return err
 		}
-		time.Sleep(time.Duration(rs.requester.Request.Delay) * time.Millisecond)
+		time.Sleep(time.Duration(rs.requester.Request.Options.Delay) * time.Millisecond)
 	}
 
 	return nil
