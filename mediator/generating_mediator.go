@@ -27,12 +27,12 @@ func (gm *GeneratingMediator) Mediate(message model.RequestMessage, responses <-
 			base := gm.bodyTempalte
 			req := template.Serialize(message.Headers, message.Body)
 
-			bodyGenerator := template.NewResponse(string(base), gm.quantity, &req)
+			bodyGenerator := template.NewResponse(base, gm.quantity, &req)
 
-			log.Printf("Generating %d responses", gm.quantity)
+			log.Printf("Generating %d messages", gm.quantity)
 			for i := 0; i < gm.quantity; i++ {
 				out <- model.ResponseMessage{
-					Response: bodyGenerator.Create(),
+					Body:     bodyGenerator.Create(),
 					Metadata: response.Metadata,
 				}
 			}
