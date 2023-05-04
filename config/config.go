@@ -8,12 +8,19 @@ import (
 
 // Configuration of the macaw
 type Configuration struct {
+	Control        Control
 	ConnectThrough string
 	Rabbit         RabbitMQ
 	HTTP           HTTP
 	Mode           string
 	Responses      []Response
 	Request        Request
+}
+
+// Control configuration
+type Control struct {
+	Enabled bool
+	OnPort  uint16
 }
 
 // Request configuration

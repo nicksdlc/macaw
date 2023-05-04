@@ -1,3 +1,6 @@
+Control:
+  Enabled: true
+  OnPort: 1234
 ConnectThrough: HTTP
 HTTP:
   Serve:              # This is where we will host in case macaw works as a receiver

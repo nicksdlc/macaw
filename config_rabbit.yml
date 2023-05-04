@@ -1,3 +1,6 @@
+Control:
+  Enabled: true
+  OnPort: 1234
 ConnectThrough: RabbitMQ
 Rabbit:
   Host: localhost
