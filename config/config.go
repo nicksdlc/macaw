@@ -13,12 +13,14 @@ type Configuration struct {
 	HTTP           HTTP
 	Mode           string
 	Responses      []Response
-	Request        Request
+	Requests       []Request
 }
 
 // Request configuration
 type Request struct {
 	To      string
+	From    string
+	Type    string
 	Body    Body
 	Options Options
 }

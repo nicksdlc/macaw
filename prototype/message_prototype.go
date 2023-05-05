@@ -18,6 +18,9 @@ type MessagePrototype struct {
 	// Optional and used mostly in HTTP requests
 	Parameters map[string]string
 
+	// Type is a message type
+	Type string
+
 	// BodyTemplate is a template for message body
 	// It uses text/template syntax
 	BodyTemplate string

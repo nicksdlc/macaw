@@ -33,8 +33,14 @@ func get(communicator communicators.Communicator, cfg config.Configuration) runn
 
 func runSender(communicator communicators.Communicator, cfg config.Configuration) {
 	if cfg.Mode == senderName {
-		sender := sender.NewMessageSender(communicator, cfg.Request)
-		sender.Send()
+		sender := sender.NewMessageSender(communicator, cfg.Requests)
+		resp, err := sender.SendWithResponse()
+		if err != nil {
+			log.Fatalf("Error sending message: %s", err)
+		}
+		for r := range resp {
+			log.Printf(" [runner] Received response: %s", r.Body)
+		}
 	} else {
 		log.Fatalf(inconsistentRunnerMessage, senderName, cfg.Mode)
 	}
@@ -47,7 +53,7 @@ func runReceiver(communicator communicators.Communicator, cfg config.Configurati
 
 		var forever chan struct{}
 
-		log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+		log.Printf(" [runner] Waiting for messages. To exit press CTRL+C")
 		<-forever
 	} else {
 		log.Fatalf(inconsistentRunnerMessage, receiverName, cfg.Mode)

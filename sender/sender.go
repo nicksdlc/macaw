@@ -1,12 +1,10 @@
 package sender
 
 import (
-	"time"
-
 	"github.com/nicksdlc/macaw/communicators"
 	"github.com/nicksdlc/macaw/config"
-	"github.com/nicksdlc/macaw/generator"
 	"github.com/nicksdlc/macaw/model"
+	"github.com/nicksdlc/macaw/prototype"
 )
 
 // Sender sends message to the external interface
@@ -16,29 +14,21 @@ type Sender interface {
 
 // MessageSender generates and sends defined quantity of messages
 type MessageSender struct {
-	communicator communicators.Communicator
-	requester    *generator.JSONRequester
+	communicator   communicators.Communicator
+	requestBuilder prototype.PrototypeBuilder
 }
 
 // NewMessageSender creates a new sender for the provided communicator
-func NewMessageSender(communicator communicators.Communicator, request config.Request) *MessageSender {
+func NewMessageSender(communicator communicators.Communicator, request []config.Request) *MessageSender {
 	return &MessageSender{
-		communicator: communicator,
-		requester: &generator.JSONRequester{
-			Request: request,
-		},
+		communicator:   communicator,
+		requestBuilder: prototype.NewRequestPrototypeBuilder(request),
 	}
 }
 
-// Send generates and send requests to communicator
-func (rs *MessageSender) Send() error {
-	for _, req := range rs.requester.Generate() {
-		err := rs.communicator.Post(model.RequestMessage{Body: []byte(req)})
-		if err != nil {
-			return err
-		}
-		time.Sleep(time.Duration(rs.requester.Request.Options.Delay) * time.Millisecond)
-	}
+// SendWithResponse sendr requests and publish responses to the channel
+func (rs *MessageSender) SendWithResponse() (chan model.ResponseMessage, error) {
+	rs.communicator.RequestWith(rs.requestBuilder.Build())
 
-	return nil
+	return rs.communicator.PostAndListen()
 }

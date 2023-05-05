@@ -9,9 +9,11 @@ import (
 type Communicator interface {
 	RespondWith(response []prototype.MessagePrototype)
 
+	RequestWith(request []prototype.MessagePrototype)
+
 	Close() error
 
-	Post(body model.RequestMessage) error
+	PostAndListen() (chan model.ResponseMessage, error)
 
 	ConsumeMediateReplyWithResponse()
 }

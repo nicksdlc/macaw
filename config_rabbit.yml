@@ -8,6 +8,8 @@ Rabbit:
     - Exchange: 
       Name: ex.response
       RoutingKey: "responses.#"
+    - Exchange: 
+      Name: test-sender-requests
   Queues: 
     - Queue:
       Name: q.response
@@ -19,7 +21,7 @@ Rabbit:
   ConnectionRetry:
     ElapsedTime: 2
     Interval: 20
-Mode: receiver
+Mode: sender
 Responses:
   - Response:
     To: "ex.response"
@@ -41,8 +43,11 @@ Responses:
       String: "plain response"
     Options:
       Quantity: 1
-Request:
-  File: ./request.json
-  Options:
-    Delay: 0
-    Quantity: 1
+Requests:
+  - Request:
+    To: "test-sender-requests"
+    From: "q.test"
+    Body:
+      File: ./request.json
+    Options:
+      Quantity: 1

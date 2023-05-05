@@ -19,6 +19,7 @@ type RMQExchangeCommunicator struct {
 	ConnectionRetries config.Retry
 
 	responsePrototypes []prototype.MessagePrototype
+	requestPrototypes  []prototype.MessagePrototype
 
 	sendChannel    *amqp.Channel
 	receiveChannel *amqp.Channel
@@ -55,6 +56,11 @@ func (rc *RMQExchangeCommunicator) RespondWith(response []prototype.MessageProto
 	rc.responsePrototypes = response
 }
 
+// RequestWith defines requests to be sent to RMQ
+func (rc *RMQExchangeCommunicator) RequestWith(request []prototype.MessagePrototype) {
+	rc.requestPrototypes = request
+}
+
 // Close closes connection to RMQ
 func (rc *RMQExchangeCommunicator) Close() error {
 	err := rc.sendChannel.Close()
@@ -65,9 +71,23 @@ func (rc *RMQExchangeCommunicator) Close() error {
 	return rc.connection.Close()
 }
 
-// Post sends request to exchange
-func (rc *RMQExchangeCommunicator) Post(message model.RequestMessage) error {
-	return rc.post(rc.exchanges[0], message)
+// PostAndListen sends request to exchange and waits for response
+func (rc *RMQExchangeCommunicator) PostAndListen() (chan model.ResponseMessage, error) {
+	responseChannel := make(chan model.ResponseMessage)
+
+	for _, prototype := range rc.requestPrototypes {
+		p := prototype
+		go func() {
+			resp := model.ResponseMessage{}
+			for r := range p.Mediators.Run(model.RequestMessage{}, resp) {
+				log.Printf("Sending message to %s", p.To)
+				rc.post(rc.getExchange(p.To), model.RequestMessage{Body: []byte(r.Body)})
+			}
+			rc.consumeAndStore(responseChannel, p)
+		}()
+	}
+
+	return responseChannel, nil
 }
 
 // ConsumeMediateReplyWithResponse opens a channel to wait for the information from rabbit mq
@@ -94,7 +114,7 @@ func (rc *RMQExchangeCommunicator) post(exchange exchange, message model.Request
 	}, rc.retrierPolicy)
 	failOnError(err, "Failed to publish a message")
 
-	log.Printf(" [x] Sent to exchange %s\n", rc.exchanges[0].name)
+	log.Printf(" [rmq-connector] Sent to exchange %s\n", exchange.name)
 	return nil
 }
 
@@ -119,9 +139,31 @@ func (rc *RMQExchangeCommunicator) consume(messagePrototype prototype.MessagePro
 			resp := model.ResponseMessage{}
 			for r := range messagePrototype.Mediators.Run(message, resp) {
 				if matchers.MatchAny(messagePrototype.Matcher, message) {
-					rc.post(rc.getExchange(messagePrototype.To), model.RequestMessage{Body: []byte(r.Response)})
+					rc.post(rc.getExchange(messagePrototype.To), model.RequestMessage{Body: []byte(r.Body)})
 				}
 			}
+		}
+	}()
+}
+
+func (rc *RMQExchangeCommunicator) consumeAndStore(storeChan chan model.ResponseMessage, messagePrototype prototype.MessagePrototype) {
+	amqpMsgs, err := rc.receiveChannel.Consume(
+		messagePrototype.From, // queue
+		"",                    // consumer
+		true,                  // auto-ack
+		false,                 // exclusive
+		false,                 // no-local
+		false,                 // no-wait
+		nil,                   // args
+	)
+	failOnError(err, "Failed to register a consumer")
+
+	go func() {
+		for delivery := range amqpMsgs {
+			message := model.ResponseMessage{
+				Body: string(delivery.Body),
+			}
+			storeChan <- message
 		}
 	}()
 }
