@@ -5,6 +5,7 @@ import (
 
 	"github.com/nicksdlc/macaw/config"
 	"github.com/nicksdlc/macaw/context"
+	"github.com/nicksdlc/macaw/ctl"
 )
 
 func main() {
@@ -15,9 +16,17 @@ func main() {
 		log.Panic(err.Error())
 	}
 
+	runCtl(cfg, ctx)
+
 	ctx.Run()
+
 }
 
 func readConfig() config.Configuration {
-	return config.Read("config_rabbit")
+	return config.Read("config")
+}
+
+func runCtl(cfg config.Configuration, ctx *context.Context) {
+	ctl := ctl.New(cfg.Control.OnPort, ctx)
+	go ctl.Serve()
 }
