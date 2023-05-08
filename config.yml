@@ -8,15 +8,22 @@ Responses:
   - Response:
     Request:
       To: "/test"
+      Matchers:
+      - Type: excludesfield
+        In: headers
+        Name: "requestId"
+        Value: 10
     Body:
       File: ./response_short_http.json
+    
     Options: 
       Quantity: 1
   - Response:
     Request:
       To: "/otherTest"
       Matchers:
-        Field: 
+        - Type: field
+          In: headers
           Name: "otherRequestId"
           Value: 10
     Body:

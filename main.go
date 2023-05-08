@@ -19,5 +19,5 @@ func main() {
 }
 
 func readConfig() config.Configuration {
-	return config.Read("config_rabbit")
+	return config.Read("config")
 }

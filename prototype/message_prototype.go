@@ -56,20 +56,11 @@ func buildMediators(bodyTemplate string, options config.Options) mediator.Mediat
 	return chain
 }
 
-func buildMatcher(cfg config.Matchers) []matchers.Matcher {
+func buildMatcher(cfg []config.Matcher) []matchers.Matcher {
 	messageMatchers := []matchers.Matcher{}
 
-	if cfg.Field.Name != "" {
-		messageMatchers = append(messageMatchers, &matchers.FieldMatcher{
-			Field: cfg.Field.Name,
-			Value: cfg.Field.Value,
-		})
-	}
-
-	if cfg.Contains.Value != "" {
-		messageMatchers = append(messageMatchers, &matchers.BodyContainsMatcher{
-			Contains: cfg.Contains.Value,
-		})
+	for _, matcher := range cfg {
+		messageMatchers = append(messageMatchers, matcherTypes[matcher.Type](matcher))
 	}
 
 	return messageMatchers

@@ -25,7 +25,7 @@ Responses:
     Request:
       To: "/test/evaluate"
       Matchers:
-        Contains: 
+        - Contains: 
           Value: "\"systemId\": 999"
     Body:
       String: "plain response"
