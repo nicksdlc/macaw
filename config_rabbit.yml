@@ -37,7 +37,8 @@ Responses:
     Request:
       To: "q.test"
       Matchers:
-        Contains: 
+        - Type: contains
+          In: body 
           Value: "\"systemId\": 999"
     Body:
       String: "plain response"

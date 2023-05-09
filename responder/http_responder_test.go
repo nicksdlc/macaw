@@ -44,14 +44,15 @@ func TestShouldNotRespondIfDoesNotMatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("No port is available: %s", err.Error())
 	}
+	fieldMatcher := config.Matcher{
+		Type:  "field",
+		Name:  "id",
+		Value: "test",
+	}
 	configuredResponse := config.Response{
 		ResponseRequest: config.ResponseRequest{
-			To: "/test",
-			Matchers: config.Matchers{
-				Field: config.FieldMatcher{
-					Name:  "requestID",
-					Value: "test",
-				}},
+			To:       "/test",
+			Matchers: []config.Matcher{fieldMatcher},
 		},
 		Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
 		Options: config.Options{Quantity: 1, Delay: 0},

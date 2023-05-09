@@ -20,15 +20,17 @@ func TestNoResponseCreatedOnEmptyConfigurtion(t *testing.T) {
 
 func TestResponseCreatedOnValidConfigurtion(t *testing.T) {
 	// Given
+	fieldMatcher := config.Matcher{
+		Type:  "field",
+		Name:  "id",
+		Value: "test",
+	}
+
 	responseConfig := []config.Response{
 		{
 			ResponseRequest: config.ResponseRequest{
-				To: "test",
-				Matchers: config.Matchers{
-					Field: config.FieldMatcher{
-						Name:  "id",
-						Value: "test",
-					}},
+				To:       "test",
+				Matchers: []config.Matcher{fieldMatcher},
 			},
 			Body: config.Body{String: "test"},
 		},
@@ -45,26 +47,28 @@ func TestResponseCreatedOnValidConfigurtion(t *testing.T) {
 
 func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 	// Given
+	fieldMatcher1 := config.Matcher{
+		Type:  "field",
+		Name:  "id",
+		Value: "test",
+	}
+	fieldMatcher2 := config.Matcher{
+		Type:  "field",
+		Name:  "id2",
+		Value: "test2",
+	}
 	responseConfig := []config.Response{
 		{
 			ResponseRequest: config.ResponseRequest{
-				To: "test",
-				Matchers: config.Matchers{
-					Field: config.FieldMatcher{
-						Name:  "id",
-						Value: "test",
-					}},
+				To:       "test",
+				Matchers: []config.Matcher{fieldMatcher1},
 			},
 			Body: config.Body{String: "test"},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
-				To: "test2",
-				Matchers: config.Matchers{
-					Field: config.FieldMatcher{
-						Name:  "id",
-						Value: "test2",
-					}},
+				To:       "test2",
+				Matchers: []config.Matcher{fieldMatcher2},
 			},
 			Body: config.Body{String: "test2"},
 		},
@@ -87,15 +91,16 @@ func assertPrototype(t *testing.T, name string, responsePrototype MessagePrototy
 
 func TestOneMediatorCreatedForResponse(t *testing.T) {
 	// Given
+	fieldMatcher := config.Matcher{
+		Type:  "field",
+		Name:  "id",
+		Value: "test",
+	}
 	responseConfig := []config.Response{
 		{
 			ResponseRequest: config.ResponseRequest{
-				To: "test",
-				Matchers: config.Matchers{
-					Field: config.FieldMatcher{
-						Name:  "id",
-						Value: "test",
-					}},
+				To:       "test",
+				Matchers: []config.Matcher{fieldMatcher},
 			},
 			Body: config.Body{String: "test"},
 		},

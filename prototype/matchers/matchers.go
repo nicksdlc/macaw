@@ -1,8 +1,6 @@
 package matchers
 
 import (
-	"strings"
-
 	"github.com/nicksdlc/macaw/model"
 )
 
@@ -23,14 +21,16 @@ func (m *FieldMatcher) Match(request model.RequestMessage) bool {
 	return request.Headers[m.Field] == m.Value
 }
 
-// BodyContainsMatcher is a matcher that matches request to response by body
-type BodyContainsMatcher struct {
-	Contains string
+// FieldExcludingMatcher is a matcher that matches request to response by field
+type FieldExcludingMatcher struct {
+	Field string
+
+	Value string
 }
 
-// Match matches request to response by body
-func (m *BodyContainsMatcher) Match(request model.RequestMessage) bool {
-	return strings.Contains(string(request.Body), m.Contains)
+// Match matches request to response by field
+func (m *FieldExcludingMatcher) Match(request model.RequestMessage) bool {
+	return request.Headers[m.Field] != m.Value
 }
 
 // Should be moved to a mediator maybe

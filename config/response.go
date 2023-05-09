@@ -11,5 +11,5 @@ type Response struct {
 // ResponseRequest configuration
 type ResponseRequest struct {
 	To       string
-	Matchers Matchers
+	Matchers []Matcher `json:"matchers" yaml:"matchers" mapstructure:"matchers"`
 }
