@@ -2,6 +2,9 @@ package prototype
 
 import (
 	"github.com/nicksdlc/macaw/config"
+	"github.com/nicksdlc/macaw/mediator"
+
+	matchers "github.com/nicksdlc/macaw/prototype/matchers"
 )
 
 // ResponsePrototypeBuilder builds response templates
@@ -29,6 +32,14 @@ func (rtb *ResponsePrototypeBuilder) Build() []MessagePrototype {
 			To:           response.To,
 			Matcher:      buildMatcher(response.ResponseRequest.Matchers),
 		})
+
+		// prepend matchingMediator to the mediators list
+		// so that it is the first mediator to be executed
+		// and all others can be skipped if it doesn't match
+		templates[len(templates)-1].Mediators.Prepend(
+			mediator.NewMatchingMediator(
+				matchers.ParsePattern(response.ResponseRequest.Match),
+				templates[len(templates)-1].Matcher))
 	}
 
 	return templates

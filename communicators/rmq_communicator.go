@@ -92,8 +92,21 @@ func (rc *RMQExchangeCommunicator) PostAndListen() (chan model.ResponseMessage, 
 
 // ConsumeMediateReplyWithResponse opens a channel to wait for the information from rabbit mq
 func (rc *RMQExchangeCommunicator) ConsumeMediateReplyWithResponse() {
+	var listeners []*RMQQueueListener
+	for _, queue := range rc.queues {
+		listener := NewRMQQueueListener(queue.Name, rc.receiveChannel)
+		listeners = append(listeners, listener)
+		listener.Listen()
+	}
+
 	for _, prototype := range rc.responsePrototypes {
-		go rc.consume(prototype)
+		messageChannel := make(chan model.RequestMessage)
+		for _, listener := range listeners {
+			if listener.QueueName == prototype.From {
+				listener.AddListener(messageChannel)
+			}
+		}
+		go rc.consume(prototype, messageChannel)
 	}
 }
 
@@ -118,24 +131,9 @@ func (rc *RMQExchangeCommunicator) post(exchange exchange, message model.Request
 	return nil
 }
 
-func (rc *RMQExchangeCommunicator) consume(messagePrototype prototype.MessagePrototype) {
-	amqpMsgs, err := rc.sendChannel.Consume(
-		messagePrototype.From, // queue
-		"",                    // consumer
-		true,                  // auto-ack
-		false,                 // exclusive
-		false,                 // no-local
-		false,                 // no-wait
-		nil,                   // args
-	)
-	failOnError(err, "Failed to register a consumer")
-
+func (rc *RMQExchangeCommunicator) consume(messagePrototype prototype.MessagePrototype, messages chan model.RequestMessage) {
 	go func() {
-		for delivery := range amqpMsgs {
-			message := model.RequestMessage{
-				Body: delivery.Body,
-			}
-
+		for message := range messages {
 			resp := model.ResponseMessage{}
 			for r := range messagePrototype.Mediators.Run(message, resp) {
 				if matchers.MatchAny(messagePrototype.Matcher, message) {
