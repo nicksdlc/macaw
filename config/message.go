@@ -11,5 +11,3 @@ type Options struct {
 	Quantity int
 	Delay    int
 }
-
-

@@ -12,21 +12,29 @@ Rabbit:
       Name: test-sender-requests
   Queues: 
     - Queue:
-      Name: q.response
-      Args:
-        - "x-message-ttl": 300000
-        - "x-queue-mode": "lazy"
+      Name: q.retrieval
+      # Args:
+      #   - "x-message-ttl": 300000
+      #   - "x-queue-mode": "lazy"
     - Queue:
       Name: q.test
   ConnectionRetry:
     ElapsedTime: 2
     Interval: 20
-Mode: sender
+Mode: receiver
 Responses:
   - Response:
     To: "ex.response"
     Request:
       To: "q.retrieval"
+      Match: all
+      Matchers:
+      - Type: contains
+        In: body
+        Value: "requestId"
+      - Type: contains
+        In: body
+        Value: "systemId"
     Body:
       File: ./response_short.json
     Options:
@@ -36,10 +44,14 @@ Responses:
     To: "ex.response"
     Request:
       To: "q.test"
+      Match: any
       Matchers:
         - Type: contains
           In: body 
           Value: "\"systemId\": 999"
+        - Type: contains
+          In: body 
+          Value: "test"
     Body:
       String: "plain response"
     Options:

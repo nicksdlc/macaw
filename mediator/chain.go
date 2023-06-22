@@ -1,8 +1,6 @@
 package mediator
 
 import (
-	"log"
-
 	"github.com/nicksdlc/macaw/model"
 )
 
@@ -29,13 +27,25 @@ func (mc *MediatorChain) Append(mediator Mediator) {
 
 }
 
+func (mc *MediatorChain) Prepend(mediator Mediator) {
+	if mc.linkedMediator == nil {
+		mc.linkedMediator = &chainedMediator{
+			mediator: mediator,
+		}
+		return
+	}
+
+	mc.linkedMediator = &chainedMediator{
+		mediator: mediator,
+		next:     mc.linkedMediator,
+	}
+}
+
 func (mc *MediatorChain) Run(request model.RequestMessage, base model.ResponseMessage) <-chan model.ResponseMessage {
 	m := mc.linkedMediator
 	channel := m.mediator.Mediate(request, mc.generateChan(base))
-	log.Printf("Mediator %T", m.mediator)
 
 	for m.next != nil {
-		log.Printf("Mediator %T", m.next.mediator)
 		m = m.next
 		channel = m.mediator.Mediate(request, channel)
 	}
