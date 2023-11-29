@@ -1,4 +1,7 @@
 ConnectThrough: HTTP
+DumpMetrics:
+  Enabled: true
+  Frequency: 2
 HTTP:
   Serve: 
     Host: /test

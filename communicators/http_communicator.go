@@ -12,6 +12,16 @@ import (
 	"github.com/nicksdlc/macaw/model"
 	"github.com/nicksdlc/macaw/prototype"
 	"github.com/nicksdlc/macaw/prototype/matchers"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	responseGauge = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "macaw_response_current",
+		Help: "The number of currently processed responses",
+	})
 )
 
 // HTTPCommunicator is a communicator used to send and receive HTTP requests
@@ -38,8 +48,11 @@ func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 
 	for _, response := range responses {
 		// re-assignment is required since, if not done here - will always point to last response
+
 		res := response
 		m.responseHandler[response.From] = func(w http.ResponseWriter, r *http.Request) {
+			responseGauge.Inc()
+			defer responseGauge.Dec()
 			message := model.RequestMessage{
 				Body:    getRequestBody(r),
 				Headers: getQueryParams(r.URL),
@@ -52,6 +65,7 @@ func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 				}
 			}
 		}
+
 	}
 }
 

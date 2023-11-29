@@ -1,8 +1,6 @@
 package mediator
 
 import (
-	"log"
-
 	"github.com/nicksdlc/macaw/model"
 	"github.com/nicksdlc/macaw/prototype/matchers"
 )
@@ -25,7 +23,6 @@ func (mm *MatchingMediator) Mediate(message model.RequestMessage, responses <-ch
 		defer close(out)
 		for response := range responses {
 			if matchers.Match(mm.matchers, message, mm.pattern) {
-				log.Printf("Matched message: %s", message)
 				out <- response
 			}
 		}
