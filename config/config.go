@@ -9,6 +9,7 @@ import (
 // Configuration of the macaw
 type Configuration struct {
 	ConnectThrough string
+	DumpMetrics    DumpMetrics
 	Rabbit         RabbitMQ
 	HTTP           HTTP
 	Mode           string
@@ -23,6 +24,12 @@ type Request struct {
 	Type    string
 	Body    Body
 	Options Options
+}
+
+// DumpMetrics configuration
+type DumpMetrics struct {
+	Enabled   bool
+	Frequency int
 }
 
 // Retry represents how many retries to do and with which interval

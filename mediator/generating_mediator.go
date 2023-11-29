@@ -1,8 +1,6 @@
 package mediator
 
 import (
-	"log"
-
 	"github.com/nicksdlc/macaw/model"
 	"github.com/nicksdlc/macaw/template"
 )
@@ -29,7 +27,6 @@ func (gm *GeneratingMediator) Mediate(message model.RequestMessage, responses <-
 
 			bodyGenerator := template.NewResponse(base, gm.quantity, &req)
 
-			log.Printf("Generating %d messages", gm.quantity)
 			for i := 0; i < gm.quantity; i++ {
 				out <- model.ResponseMessage{
 					Body:     bodyGenerator.Create(),
