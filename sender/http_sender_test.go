@@ -133,7 +133,7 @@ func createRequest(path, body string, quantity int, server *httptest.Server) con
 		To:   path,
 		Options: config.Options{
 			Quantity: quantity,
-			Delay:    1,
+			Delay:    "1",
 		},
 	}
 	return sendRequest

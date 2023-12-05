@@ -25,7 +25,7 @@ func TestShouldRespondWithPreSetResponseToMessage(t *testing.T) {
 			To: "/test",
 		},
 		Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
-		Options: config.Options{Quantity: 1, Delay: 0},
+		Options: config.Options{Quantity: 1, Delay: "0"},
 	}
 
 	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), []config.Response{configuredResponse})
@@ -55,7 +55,7 @@ func TestShouldNotRespondIfDoesNotMatch(t *testing.T) {
 			Matchers: []config.Matcher{fieldMatcher},
 		},
 		Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
-		Options: config.Options{Quantity: 1, Delay: 0},
+		Options: config.Options{Quantity: 1, Delay: "0"},
 	}
 
 	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), []config.Response{configuredResponse})
@@ -84,14 +84,14 @@ func TestShouldRespondToDifferntRequest(t *testing.T) {
 				To: "/test",
 			},
 			Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
-			Options: config.Options{Quantity: 1, Delay: 0},
+			Options: config.Options{Quantity: 1, Delay: "0"},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "/test2",
 			},
 			Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"otherID\"}}}"},
-			Options: config.Options{Quantity: 1, Delay: 0},
+			Options: config.Options{Quantity: 1, Delay: "0"},
 		},
 	}
 
@@ -106,6 +106,51 @@ func TestShouldRespondToDifferntRequest(t *testing.T) {
 
 	assertResponseContentCorrect(t, response, expectedFromTest)
 	assertResponseContentCorrect(t, otherResponse, expectedFromTest2)
+}
+
+func TestSameEndpointShouldRespondWithDifferentResponses(t *testing.T) {
+	expectedFromTest := "\"name\": 10"
+	expectedFromTest2 := "\"name\": 42"
+
+	port, err := getFreePort()
+	if err != nil {
+		t.Fatalf("No port is available: %s", err.Error())
+	}
+	configuredResponses := []config.Response{
+		{
+			ResponseRequest: config.ResponseRequest{
+				To: "/test",
+				Matchers: []config.Matcher{
+					{
+						Type:  "field",
+						Name:  "requestID",
+						Value: "10",
+					},
+				},
+			},
+			Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"requestID\"}}}"},
+			Options: config.Options{Quantity: 1, Delay: "0"},
+		},
+		{
+			ResponseRequest: config.ResponseRequest{
+				To: "/test",
+			},
+			Body:    config.Body{String: "{\"name\": {{.FromRequestHeaders \"otherID\"}}}"},
+			Options: config.Options{Quantity: 1, Delay: "0"},
+		},
+	}
+
+	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), configuredResponses)
+	sut.Listen()
+	response, _ := http.Get(fmt.Sprintf("http://localhost:%d/test?requestID=10", port))
+	otherResponse, err := http.Get(fmt.Sprintf("http://localhost:%d/test?otherID=42", port))
+
+	if err != nil {
+		t.Fatalf("expected a no error, instead got: %s", err.Error())
+	}
+
+	assertResponseContentCorrect(t, otherResponse, expectedFromTest2)
+	assertResponseContentCorrect(t, response, expectedFromTest)
 }
 
 func assertResponseContentCorrect(t *testing.T, response *http.Response, expectedContent string) {

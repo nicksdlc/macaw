@@ -46,26 +46,31 @@ func NewHTTPCommunicator(endpoint string, port uint16, client *http.Client) *HTT
 func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 	m.responseHandler = make(map[string]func(w http.ResponseWriter, r *http.Request))
 
-	for _, response := range responses {
+	endpointSlices := splitResponsesByEndpoint(responses)
+
+	for _, response := range endpointSlices {
 		// re-assignment is required since, if not done here - will always point to last response
 
 		res := response
-		m.responseHandler[response.From] = func(w http.ResponseWriter, r *http.Request) {
+		m.responseHandler[response[0].From] = func(w http.ResponseWriter, r *http.Request) {
 			responseGauge.Inc()
 			defer responseGauge.Dec()
+
 			message := model.RequestMessage{
 				Body:    getRequestBody(r),
 				Headers: getQueryParams(r.URL),
 			}
 
-			resp := model.ResponseMessage{}
-			for r := range res.Mediators.Run(message, resp) {
-				if matchers.MatchAny(res.Matcher, message) {
-					io.WriteString(w, r.Body)
+			for _, respPrototype := range res {
+				resp := model.ResponseMessage{}
+				for r := range respPrototype.Mediators.Run(message, resp) {
+					if matchers.MatchAny(respPrototype.Matcher, message) {
+						io.WriteString(w, r.Body)
+						return
+					}
 				}
 			}
 		}
-
 	}
 }
 
@@ -166,6 +171,14 @@ func (m HTTPCommunicator) sendRequest(path, requestType, body string) (*http.Res
 	}
 
 	return response, nil
+}
+
+func splitResponsesByEndpoint(responses []prototype.MessagePrototype) map[string][]prototype.MessagePrototype {
+	endpointSlices := make(map[string][]prototype.MessagePrototype)
+	for _, response := range responses {
+		endpointSlices[response.From] = append(endpointSlices[response.From], response)
+	}
+	return endpointSlices
 }
 
 func readResponseBody(response *http.Response) string {
