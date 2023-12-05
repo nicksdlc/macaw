@@ -21,7 +21,13 @@ func (mc *MediatorChain) Append(mediator Mediator) {
 		return
 	}
 
-	mc.linkedMediator.next = &chainedMediator{
+	lastMediator := mc.linkedMediator
+	// get last mediator in chain
+	for lastMediator.next != nil {
+		lastMediator = lastMediator.next
+	}
+
+	lastMediator.next = &chainedMediator{
 		mediator: mediator,
 	}
 

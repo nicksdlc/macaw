@@ -1,7 +1,7 @@
 ConnectThrough: HTTP
 DumpMetrics:
   Enabled: true
-  Frequency: 2
+  Frequency: 5
 HTTP:
   Serve: 
     Host: /test
@@ -12,15 +12,30 @@ Responses:
     Request:
       To: "/test"
       Matchers:
+        - Type: field
+          In: headers
+          Name: "requestId"
+          Value: 999
+    Body:
+      String: "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
+    Options: 
+      Quantity: 1
+      RandomDelay:
+        Min: 0s
+        Max: 5s
+  - Response:
+    Request:
+      To: "/test"
+      Matchers:
       - Type: excludesfield
         In: headers
         Name: "requestId"
         Value: 10
     Body:
       File: ./response_short_http.json
-    
     Options: 
       Quantity: 1
+      Delay: 300ms
   - Response:
     Request:
       To: "/otherTest"

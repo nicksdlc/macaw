@@ -52,6 +52,7 @@ func buildMediators(bodyTemplate string, options config.Options) mediator.Mediat
 
 	chain.Append(mediator.NewGeneratingMediator(options.Quantity, bodyTemplate))
 	chain.Append(mediator.NewDelayingMediator(options.Delay))
+	chain.Append(mediator.NewRandomDelayingMediator(options.RandomDelay.Min, options.RandomDelay.Max))
 
 	return chain
 }
