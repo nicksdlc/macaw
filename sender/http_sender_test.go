@@ -128,7 +128,7 @@ func prepareSender(requests []config.Request, server *httptest.Server) *MessageS
 
 func createRequest(path, body string, quantity int, server *httptest.Server) config.Request {
 	sendRequest := config.Request{
-		Body: config.Body{String: body},
+		Body: config.Body{String: []string{body}},
 		Type: "GET",
 		To:   path,
 		Options: config.Options{

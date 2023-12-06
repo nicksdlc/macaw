@@ -1,16 +1,18 @@
 package mediator
 
 import (
+	"math/rand"
+
 	"github.com/nicksdlc/macaw/model"
 	"github.com/nicksdlc/macaw/template"
 )
 
 type GeneratingMediator struct {
-	bodyTempalte string
+	bodyTempalte []string
 	quantity     int
 }
 
-func NewGeneratingMediator(quantity int, bodyTempalte string) *GeneratingMediator {
+func NewGeneratingMediator(quantity int, bodyTempalte []string) *GeneratingMediator {
 	return &GeneratingMediator{
 		bodyTempalte: bodyTempalte,
 		quantity:     quantity,
@@ -22,7 +24,7 @@ func (gm *GeneratingMediator) Mediate(message model.RequestMessage, responses <-
 	go func() {
 		defer close(out)
 		for response := range responses {
-			base := gm.bodyTempalte
+			base := gm.getRandomTemplate()
 			req := template.Serialize(message.Headers, message.Body)
 
 			bodyGenerator := template.NewResponse(base, gm.quantity, &req)
@@ -36,4 +38,9 @@ func (gm *GeneratingMediator) Mediate(message model.RequestMessage, responses <-
 		}
 	}()
 	return out
+}
+
+func (gm *GeneratingMediator) getRandomTemplate() string {
+	templateId := rand.Intn(len(gm.bodyTempalte))
+	return gm.bodyTempalte[templateId]
 }

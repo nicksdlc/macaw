@@ -23,7 +23,7 @@ type MessagePrototype struct {
 
 	// BodyTemplate is a template for message body
 	// It uses text/template syntax
-	BodyTemplate string
+	BodyTemplate []string
 
 	Mediators mediator.MediatorChain
 
@@ -47,7 +47,7 @@ func readMessageTemplate(filePath string) []byte {
 	return base
 }
 
-func buildMediators(bodyTemplate string, options config.Options) mediator.MediatorChain {
+func buildMediators(bodyTemplate []string, options config.Options) mediator.MediatorChain {
 	var chain mediator.MediatorChain
 
 	chain.Append(mediator.NewGeneratingMediator(options.Quantity, bodyTemplate))
@@ -67,9 +67,16 @@ func buildMatcher(cfg []config.Matcher) []matchers.Matcher {
 	return messageMatchers
 }
 
-func buildBodyTemplate(body config.Body) string {
-	if body.File != "" {
-		return string(readMessageTemplate(body.File))
+func buildBodyTemplate(body config.Body) []string {
+	var bodyTemplate []string
+
+	for _, bodyPart := range body.File {
+		bodyTemplate = append(bodyTemplate, string(readMessageTemplate(bodyPart)))
 	}
-	return body.String
+
+	for _, bodyPart := range body.String {
+		bodyTemplate = append(bodyTemplate, bodyPart)
+	}
+
+	return bodyTemplate
 }

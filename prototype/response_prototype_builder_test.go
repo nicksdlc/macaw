@@ -32,7 +32,7 @@ func TestResponseCreatedOnValidConfigurtion(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher},
 			},
-			Body: config.Body{String: "test"},
+			Body: config.Body{String: []string{"test"}},
 		},
 	}
 
@@ -63,14 +63,14 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher1},
 			},
-			Body: config.Body{String: "test"},
+			Body: config.Body{String: []string{"test"}},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To:       "test2",
 				Matchers: []config.Matcher{fieldMatcher2},
 			},
-			Body: config.Body{String: "test2"},
+			Body: config.Body{String: []string{"test2"}},
 		},
 	}
 
@@ -85,7 +85,7 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 
 func assertPrototype(t *testing.T, name string, responsePrototype MessagePrototype) {
 	assert.Equal(t, name, responsePrototype.From)
-	assert.Equal(t, name, responsePrototype.BodyTemplate)
+	assert.Equal(t, name, responsePrototype.BodyTemplate[0])
 	assert.Equal(t, 1, len(responsePrototype.Matcher))
 }
 
@@ -102,7 +102,31 @@ func TestOneMediatorCreatedForResponse(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher},
 			},
-			Body: config.Body{String: "test"},
+			Body: config.Body{String: []string{"test"}},
+		},
+	}
+
+	// When
+	responsePrototypes := NewResponsePrototypeBuilder(responseConfig).Build()
+
+	// Then
+	assert.NotNil(t, responsePrototypes[0].Mediators)
+}
+
+func TestGeneratingMediatorSupportsVariadicGeneration(t *testing.T) {
+	// Given
+	fieldMatcher := config.Matcher{
+		Type:  "field",
+		Name:  "id",
+		Value: "test",
+	}
+	responseConfig := []config.Response{
+		{
+			ResponseRequest: config.ResponseRequest{
+				To:       "test",
+				Matchers: []config.Matcher{fieldMatcher},
+			},
+			Body: config.Body{String: []string{"test"}},
 		},
 	}
 
