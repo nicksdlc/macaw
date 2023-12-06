@@ -24,7 +24,7 @@ func TestOnValidRequestConfigRequestPrototypeIsBuilt(t *testing.T) {
 		{
 			To: "test",
 			Body: config.Body{
-				String: "test",
+				String: []string{"test"},
 			},
 		},
 	}
@@ -35,5 +35,5 @@ func TestOnValidRequestConfigRequestPrototypeIsBuilt(t *testing.T) {
 	// Then
 	assert.Equal(t, 1, len(requestPrototypes))
 	assert.Equal(t, "test", requestPrototypes[0].To)
-	assert.Equal(t, "test", requestPrototypes[0].BodyTemplate)
+	assert.Equal(t, "test", requestPrototypes[0].BodyTemplate[0])
 }

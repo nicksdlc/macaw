@@ -17,12 +17,15 @@ Responses:
           Name: "requestId"
           Value: 999
     Body:
-      String: "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
+      String: 
+      - "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
+      - "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n"
+      - "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
     Options: 
       Quantity: 1
       RandomDelay:
         Min: 0s
-        Max: 5s
+        Max: 2s
   - Response:
     Request:
       To: "/test"

@@ -2,8 +2,8 @@ package config
 
 // Body - message body configuration
 type Body struct {
-	File   string
-	String string
+	File   []string
+	String []string
 }
 
 // Options - message options configuration
