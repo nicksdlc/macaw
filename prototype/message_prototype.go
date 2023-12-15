@@ -74,9 +74,7 @@ func buildBodyTemplate(body config.Body) []string {
 		bodyTemplate = append(bodyTemplate, string(readMessageTemplate(bodyPart)))
 	}
 
-	for _, bodyPart := range body.String {
-		bodyTemplate = append(bodyTemplate, bodyPart)
-	}
+	bodyTemplate = append(bodyTemplate, body.String...)
 
 	return bodyTemplate
 }

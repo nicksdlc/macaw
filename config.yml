@@ -51,6 +51,18 @@ Responses:
       File: ./response_short_http_other.json
     Options: 
       Quantity: 1
+  - Response:
+    Request:
+      To: "/otherTest"
+      Matchers:
+        - Type: fieldcontains
+          In: headers
+          Name: "deadLetter"
+          Value: "fwd"
+    Body:
+      String: "Forwarding to the dead letter queue"
+    Options: 
+      Quantity: 1
 Request:
   Body:
     File: ./request.json

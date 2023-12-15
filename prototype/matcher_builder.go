@@ -33,6 +33,13 @@ func init() {
 			Value: matcherConfig.Value,
 		}
 	}
+
+	matcherTypes["fieldcontains"] = func(matcherConfig config.Matcher) matchers.Matcher {
+		return &matchers.FieldContainsMatcher{
+			Field: matcherConfig.Name,
+			Value: matcherConfig.Value,
+		}
+	}
 }
 
 type matcherBuilder func(config.Matcher) matchers.Matcher
