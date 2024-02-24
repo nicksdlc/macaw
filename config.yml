@@ -52,6 +52,7 @@ Responses:
     Options: 
       Quantity: 1
   - Response:
+    Alias: "deadLetter"
     Request:
       To: "/otherTest"
       Matchers:

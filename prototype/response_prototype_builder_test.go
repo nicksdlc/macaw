@@ -59,6 +59,7 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 	}
 	responseConfig := []config.Response{
 		{
+			Alias: "testAlias",
 			ResponseRequest: config.ResponseRequest{
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher1},
@@ -80,6 +81,7 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 	// Then
 	assert.Equal(t, 2, len(responsePrototypes))
 	assertPrototype(t, "test", responsePrototypes[0])
+	assert.Equal(t, "testAlias", responsePrototypes[0].Alias)
 	assertPrototype(t, "test2", responsePrototypes[1])
 }
 
