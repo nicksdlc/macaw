@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nicksdlc/macaw/admin"
 	"github.com/nicksdlc/macaw/config"
 	"github.com/nicksdlc/macaw/context"
 	"github.com/prometheus/client_golang/prometheus"
@@ -19,6 +20,12 @@ func main() {
 	}
 	if cfg.DumpMetrics.Enabled {
 		collectMetrics(cfg.DumpMetrics.Frequency)
+	}
+
+	if cfg.Admin != (config.Admin{}) && cfg.Admin.Enabled {
+		log.Printf("Starting admin server on port %d\n", cfg.Admin.Port)
+		mgr := admin.NewManager(cfg.Admin.Port, admin.HealthEndpoint())
+		go mgr.Start()
 	}
 
 	ctx.Run()

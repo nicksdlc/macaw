@@ -1,3 +1,6 @@
+Admin:
+  Enabled: true
+  Port: 1235
 ConnectThrough: HTTP
 DumpMetrics:
   Enabled: true
