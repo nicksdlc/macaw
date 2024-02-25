@@ -10,6 +10,7 @@ import (
 
 // MessagePrototype is a template for message with mediators, bodyTemplate and headers
 type MessagePrototype struct {
+	Alias string
 	// Headers is a map of headers
 	// Optional and used mostly in HTTP requests
 	Headers map[string]string

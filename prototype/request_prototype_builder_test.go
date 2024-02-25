@@ -22,9 +22,10 @@ func TestOnValidRequestConfigRequestPrototypeIsBuilt(t *testing.T) {
 	// Given
 	requestConfig := []config.Request{
 		{
-			To: "test",
+			Alias: "testAlias",
+			To:    "testTo",
 			Body: config.Body{
-				String: []string{"test"},
+				String: []string{"testBody"},
 			},
 		},
 	}
@@ -34,6 +35,7 @@ func TestOnValidRequestConfigRequestPrototypeIsBuilt(t *testing.T) {
 
 	// Then
 	assert.Equal(t, 1, len(requestPrototypes))
-	assert.Equal(t, "test", requestPrototypes[0].To)
-	assert.Equal(t, "test", requestPrototypes[0].BodyTemplate[0])
+	assert.Equal(t, "testAlias", requestPrototypes[0].Alias)
+	assert.Equal(t, "testTo", requestPrototypes[0].To)
+	assert.Equal(t, "testBody", requestPrototypes[0].BodyTemplate[0])
 }

@@ -26,6 +26,7 @@ type Admin struct {
 
 // Request configuration
 type Request struct {
+	Alias   string
 	To      string
 	From    string
 	Type    string

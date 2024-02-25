@@ -2,6 +2,7 @@ package config
 
 // Response configuration
 type Response struct {
+	Alias           string
 	To              string
 	ResponseRequest ResponseRequest `json:"request" yaml:"request" mapstructure:"request"`
 	Body            Body

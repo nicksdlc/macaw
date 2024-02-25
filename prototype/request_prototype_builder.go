@@ -21,6 +21,7 @@ func (b *RequestPrototypeBuilder) Build() []MessagePrototype {
 	for _, request := range b.requestConfig {
 		bodyTemplate := buildBodyTemplate(request.Body)
 		prototypes = append(prototypes, MessagePrototype{
+			Alias:        request.Alias,
 			Type:         request.Type,
 			BodyTemplate: bodyTemplate,
 			Mediators:    buildMediators(bodyTemplate, request.Options),
