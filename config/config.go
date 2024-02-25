@@ -8,6 +8,7 @@ import (
 
 // Configuration of the macaw
 type Configuration struct {
+	Admin          Admin
 	ConnectThrough string
 	DumpMetrics    DumpMetrics
 	Rabbit         RabbitMQ
@@ -15,6 +16,12 @@ type Configuration struct {
 	Mode           string
 	Responses      []Response
 	Requests       []Request
+}
+
+// Admin configuration
+type Admin struct {
+	Enabled bool
+	Port    uint16
 }
 
 // Request configuration

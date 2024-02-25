@@ -26,6 +26,7 @@ func (rtb *ResponsePrototypeBuilder) Build() []MessagePrototype {
 	for _, response := range rtb.responseConfig {
 		bodyTemplate := buildBodyTemplate(response.Body)
 		templates = append(templates, MessagePrototype{
+			Alias:        response.Alias,
 			BodyTemplate: bodyTemplate,
 			Mediators:    buildMediators(bodyTemplate, response.Options),
 			From:         response.ResponseRequest.To,
