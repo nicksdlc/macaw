@@ -3,7 +3,6 @@ package admin
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // Manager responsible for endpoints of configuration and health
@@ -33,8 +32,7 @@ func (m *Manager) Start() {
 	// start the manager
 	for _, endpoint := range m.endpoints {
 		// start the endpoint
-		fullPath := fmt.Sprintf("/admin/%s", strings.TrimPrefix(endpoint.Path, "/"))
-		mux.HandleFunc(fullPath, endpoint.Function)
+		mux.HandleFunc(endpoint.Path, endpoint.Function)
 	}
 
 	// Start the server
