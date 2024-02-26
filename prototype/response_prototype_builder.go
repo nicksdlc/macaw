@@ -24,24 +24,30 @@ func (rtb *ResponsePrototypeBuilder) Build() []MessagePrototype {
 	var templates []MessagePrototype
 
 	for _, response := range rtb.responseConfig {
-		bodyTemplate := buildBodyTemplate(response.Body)
-		templates = append(templates, MessagePrototype{
-			Alias:        response.Alias,
-			BodyTemplate: bodyTemplate,
-			Mediators:    buildMediators(bodyTemplate, response.Options),
-			From:         response.ResponseRequest.To,
-			To:           response.To,
-			Matcher:      buildMatcher(response.ResponseRequest.Matchers),
-		})
-
-		// prepend matchingMediator to the mediators list
-		// so that it is the first mediator to be executed
-		// and all others can be skipped if it doesn't match
-		templates[len(templates)-1].Mediators.Prepend(
-			mediator.NewMatchingMediator(
-				matchers.ParsePattern(response.ResponseRequest.Match),
-				templates[len(templates)-1].Matcher))
+		templates = append(templates, rtb.BuildResponse(response))
 	}
 
 	return templates
+}
+
+func (rtb *ResponsePrototypeBuilder) BuildResponse(responseConfig config.Response) MessagePrototype {
+	bodyTemplate := buildBodyTemplate(responseConfig.Body)
+	prototype := MessagePrototype{
+		Alias:        responseConfig.Alias,
+		BodyTemplate: bodyTemplate,
+		Mediators:    buildMediators(bodyTemplate, responseConfig.Options),
+		From:         responseConfig.ResponseRequest.To,
+		To:           responseConfig.To,
+		Matcher:      buildMatcher(responseConfig.ResponseRequest.Matchers),
+	}
+
+	// prepend matchingMediator to the mediators list
+	// so that it is the first mediator to be executed
+	// and all others can be skipped if it doesn't match
+	prototype.Mediators.Prepend(
+		mediator.NewMatchingMediator(
+			matchers.ParsePattern(responseConfig.ResponseRequest.Match),
+			prototype.Matcher))
+
+	return prototype
 }

@@ -24,8 +24,8 @@ func TestShouldRespondWithPreSetResponseToMessage(t *testing.T) {
 		ResponseRequest: config.ResponseRequest{
 			To: "/test",
 		},
-		Body:    config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
-		Options: config.Options{Quantity: 1, Delay: "0"},
+		Body:    &config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
+		Options: &config.Options{Quantity: 1, Delay: "0"},
 	}
 
 	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), []config.Response{configuredResponse})
@@ -54,8 +54,8 @@ func TestShouldNotRespondIfDoesNotMatch(t *testing.T) {
 			To:       "/test",
 			Matchers: []config.Matcher{fieldMatcher},
 		},
-		Body:    config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
-		Options: config.Options{Quantity: 1, Delay: "0"},
+		Body:    &config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
+		Options: &config.Options{Quantity: 1, Delay: "0"},
 	}
 
 	sut := NewMessageResponder(communicators.NewHTTPCommunicator("localhost", uint16(port), nil), []config.Response{configuredResponse})
@@ -83,15 +83,15 @@ func TestShouldRespondToDifferntRequest(t *testing.T) {
 			ResponseRequest: config.ResponseRequest{
 				To: "/test",
 			},
-			Body:    config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
-			Options: config.Options{Quantity: 1, Delay: "0"},
+			Body:    &config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
+			Options: &config.Options{Quantity: 1, Delay: "0"},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "/test2",
 			},
-			Body:    config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"otherID\"}}}"}},
-			Options: config.Options{Quantity: 1, Delay: "0"},
+			Body:    &config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"otherID\"}}}"}},
+			Options: &config.Options{Quantity: 1, Delay: "0"},
 		},
 	}
 
@@ -128,15 +128,15 @@ func TestSameEndpointShouldRespondWithDifferentResponses(t *testing.T) {
 					},
 				},
 			},
-			Body:    config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
-			Options: config.Options{Quantity: 1, Delay: "0"},
+			Body:    &config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"requestID\"}}}"}},
+			Options: &config.Options{Quantity: 1, Delay: "0"},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To: "/test",
 			},
-			Body:    config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"otherID\"}}}"}},
-			Options: config.Options{Quantity: 1, Delay: "0"},
+			Body:    &config.Body{String: []string{"{\"name\": {{.FromRequestHeaders \"otherID\"}}}"}},
+			Options: &config.Options{Quantity: 1, Delay: "0"},
 		},
 	}
 

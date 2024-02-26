@@ -114,3 +114,30 @@ At the moment following placeholders are supported:
 - Quantity
 
 Some of the placeholders support additional parameters, like _incremental_ for numbers - which will increment the number in the sequence of responses.
+
+## Admin
+
+Macaw has an admin API to control the execution of the tool. It is available on the port 1235 by default.
+
+The following endpoints are available:
+- /health - to check the health of the tool
+- /update - to update the configuration of the response
+
+### Update 
+
+Update endpoint is used to update the response configuration. It accepts the following parameters:
+- **response-alias** - the alias of the response to update
+And the body of the request should contain the new configuration of the response.
+At the moment only update of **Options** and **Body** is supported.
+You need to provide the relevant part of the configuration as a yaml in the body of the request.
+
+Example of the request:
+```
+curl -X PATCH "http://localhost:1235/update?response-alias=deadLetter" -H "Content-Type: application/yaml" -d "
+body:
+  string:
+    - "error"
+options:
+  delay: 1000ms
+"
+```

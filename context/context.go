@@ -20,6 +20,11 @@ func BuildContext(cfg config.Configuration) (*Context, error) {
 	return ctx.Build(&cfg)
 }
 
+// GetCommunicator returns the communicator
+func (ctx *Context) GetCommunicator() communicators.Communicator {
+	return ctx.communicator
+}
+
 // Build creates a context of macaw that is able to be executed
 func (ctx *Context) Build(cfg *config.Configuration) (*Context, error) {
 	ctx.cfg = cfg

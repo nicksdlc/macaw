@@ -1,6 +1,8 @@
 package admin
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // Endpoint configuration
 type Endpoint struct {

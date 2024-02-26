@@ -11,6 +11,10 @@ type Communicator interface {
 
 	RequestWith(request []prototype.MessagePrototype)
 
+	GetResponses() []prototype.MessagePrototype
+
+	UpdateResponse(response prototype.MessagePrototype)
+
 	Close() error
 
 	PostAndListen() (chan model.ResponseMessage, error)
