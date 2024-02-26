@@ -51,6 +51,20 @@ func NewRMQExchangeCommunicator(connectionString string, retries config.Retry, e
 	return rc
 }
 
+// GetResponses returns responses
+func (rc *RMQExchangeCommunicator) GetResponses() []prototype.MessagePrototype {
+	return rc.responsePrototypes
+}
+
+// UpdateResponse updates response
+func (rc *RMQExchangeCommunicator) UpdateResponse(response prototype.MessagePrototype) {
+	for i, resp := range rc.responsePrototypes {
+		if resp.Alias == response.Alias {
+			rc.responsePrototypes[i] = response
+		}
+	}
+}
+
 // RespondWith defines responses to be sent to RMQ
 func (rc *RMQExchangeCommunicator) RespondWith(response []prototype.MessagePrototype) {
 	rc.responsePrototypes = response

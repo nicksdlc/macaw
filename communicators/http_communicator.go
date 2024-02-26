@@ -31,6 +31,8 @@ type HTTPCommunicator struct {
 	httpClient      *http.Client
 	responseHandler map[string]func(w http.ResponseWriter, r *http.Request)
 	requests        []prototype.MessagePrototype
+	responses       []prototype.MessagePrototype
+	splitResponses  map[string][]*prototype.MessagePrototype
 }
 
 // NewHTTPCommunicator creates new communicator to send requests
@@ -42,16 +44,30 @@ func NewHTTPCommunicator(endpoint string, port uint16, client *http.Client) *HTT
 	}
 }
 
+func (m *HTTPCommunicator) GetResponses() []prototype.MessagePrototype {
+	return m.responses
+}
+
+func (m *HTTPCommunicator) UpdateResponse(response prototype.MessagePrototype) {
+	for i, resp := range m.splitResponses[response.From] {
+		if resp.Alias == response.Alias {
+			m.splitResponses[response.From][i] = &response
+		}
+	}
+}
+
 // RespondWith sets the response handler
 func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
+	m.responses = responses
+
 	m.responseHandler = make(map[string]func(w http.ResponseWriter, r *http.Request))
 
-	endpointSlices := splitResponsesByEndpoint(responses)
+	m.splitResponses = splitResponsesByEndpoint(m.responses)
 
-	for _, response := range endpointSlices {
+	for _, response := range m.splitResponses {
 		// re-assignment is required since, if not done here - will always point to last response
-
 		res := response
+
 		m.responseHandler[response[0].From] = func(w http.ResponseWriter, r *http.Request) {
 			responseGauge.Inc()
 			defer responseGauge.Dec()
@@ -173,10 +189,11 @@ func (m HTTPCommunicator) sendRequest(path, requestType, body string) (*http.Res
 	return response, nil
 }
 
-func splitResponsesByEndpoint(responses []prototype.MessagePrototype) map[string][]prototype.MessagePrototype {
-	endpointSlices := make(map[string][]prototype.MessagePrototype)
+func splitResponsesByEndpoint(responses []prototype.MessagePrototype) map[string][]*prototype.MessagePrototype {
+	endpointSlices := make(map[string][]*prototype.MessagePrototype)
 	for _, response := range responses {
-		endpointSlices[response.From] = append(endpointSlices[response.From], response)
+		res := response
+		endpointSlices[response.From] = append(endpointSlices[response.From], &res)
 	}
 	return endpointSlices
 }

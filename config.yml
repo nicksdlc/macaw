@@ -61,12 +61,13 @@ Responses:
       Matchers:
         - Type: fieldcontains
           In: headers
-          Name: "deadLetter"
+          Name: "deadletter"
           Value: "fwd"
     Body:
       String: "Forwarding to the dead letter queue"
     Options: 
       Quantity: 1
+      Delay: 300ms
 Request:
   Body:
     File: ./request.json

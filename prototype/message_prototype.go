@@ -1,6 +1,7 @@
 package prototype
 
 import (
+	"log"
 	"os"
 
 	"github.com/nicksdlc/macaw/config"
@@ -48,8 +49,13 @@ func readMessageTemplate(filePath string) []byte {
 	return base
 }
 
-func buildMediators(bodyTemplate []string, options config.Options) mediator.MediatorChain {
+func buildMediators(bodyTemplate []string, options *config.Options) mediator.MediatorChain {
 	var chain mediator.MediatorChain
+
+	if options == nil {
+		log.Printf("No options for message %s", bodyTemplate)
+		return chain
+	}
 
 	chain.Append(mediator.NewGeneratingMediator(options.Quantity, bodyTemplate))
 	chain.Append(mediator.NewDelayingMediator(options.Delay))
@@ -68,7 +74,7 @@ func buildMatcher(cfg []config.Matcher) []matchers.Matcher {
 	return messageMatchers
 }
 
-func buildBodyTemplate(body config.Body) []string {
+func buildBodyTemplate(body *config.Body) []string {
 	var bodyTemplate []string
 
 	for _, bodyPart := range body.File {

@@ -5,8 +5,8 @@ type Response struct {
 	Alias           string
 	To              string
 	ResponseRequest ResponseRequest `json:"request" yaml:"request" mapstructure:"request"`
-	Body            Body
-	Options         Options
+	Body            *Body
+	Options         *Options
 }
 
 // ResponseRequest configuration

@@ -32,7 +32,7 @@ func TestResponseCreatedOnValidConfigurtion(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher},
 			},
-			Body: config.Body{String: []string{"test"}},
+			Body: &config.Body{String: []string{"test"}},
 		},
 	}
 
@@ -64,14 +64,14 @@ func TestMultipleResponsesCreatedOnValidConfiguration(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher1},
 			},
-			Body: config.Body{String: []string{"test"}},
+			Body: &config.Body{String: []string{"test"}},
 		},
 		{
 			ResponseRequest: config.ResponseRequest{
 				To:       "test2",
 				Matchers: []config.Matcher{fieldMatcher2},
 			},
-			Body: config.Body{String: []string{"test2"}},
+			Body: &config.Body{String: []string{"test2"}},
 		},
 	}
 
@@ -104,7 +104,7 @@ func TestOneMediatorCreatedForResponse(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher},
 			},
-			Body: config.Body{String: []string{"test"}},
+			Body: &config.Body{String: []string{"test"}},
 		},
 	}
 
@@ -128,7 +128,7 @@ func TestGeneratingMediatorSupportsVariadicGeneration(t *testing.T) {
 				To:       "test",
 				Matchers: []config.Matcher{fieldMatcher},
 			},
-			Body: config.Body{String: []string{"test"}},
+			Body: &config.Body{String: []string{"test"}},
 		},
 	}
 
