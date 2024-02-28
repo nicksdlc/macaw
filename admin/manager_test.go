@@ -2,6 +2,7 @@ package admin
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,19 +23,17 @@ func TestManagerCreatedWithHealthEndpoint(t *testing.T) {
 	assert.Equal(t, "/health", manager.endpoints[0].Path)
 }
 
-func TestManagerStartedWithHealthEndpointReturnsOk(t *testing.T) {
+func TestHealthEndpointReturnsOk(t *testing.T) {
 	// Given
-	manager := NewManager(1234, HealthEndpoint())
+	healthEndpoint := HealthEndpoint()
 
 	// When
-	manager.Start()
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	rr := httptest.NewRecorder()
 
-	resp, err := http.Get("http://localhost:1234/health")
-	if err != nil {
-		t.Fatalf("Could not make GET request: %v", err)
-	}
+	http.HandlerFunc(healthEndpoint.Function).ServeHTTP(rr, req)
 
 	// Then
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Expected HTTP status code 200 OK")
+	assert.Equal(t, http.StatusOK, rr.Code, "Expected HTTP status code 200 OK")
 
 }

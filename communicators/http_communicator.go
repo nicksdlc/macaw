@@ -29,10 +29,11 @@ type HTTPCommunicator struct {
 	serveEndpoint   string
 	port            uint16
 	httpClient      *http.Client
-	responseHandler map[string]func(w http.ResponseWriter, r *http.Request)
+	responseHandler map[string]*dynamicHandler
 	requests        []prototype.MessagePrototype
 	responses       []prototype.MessagePrototype
 	splitResponses  map[string][]*prototype.MessagePrototype
+	mux             *http.ServeMux
 }
 
 // NewHTTPCommunicator creates new communicator to send requests
@@ -60,7 +61,9 @@ func (m *HTTPCommunicator) UpdateResponse(response prototype.MessagePrototype) {
 func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 	m.responses = responses
 
-	m.responseHandler = make(map[string]func(w http.ResponseWriter, r *http.Request))
+	if m.responseHandler == nil {
+		m.responseHandler = make(map[string]*dynamicHandler)
+	}
 
 	m.splitResponses = splitResponsesByEndpoint(m.responses)
 
@@ -68,7 +71,7 @@ func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 		// re-assignment is required since, if not done here - will always point to last response
 		res := response
 
-		m.responseHandler[response[0].From] = func(w http.ResponseWriter, r *http.Request) {
+		handlerFunc := func(w http.ResponseWriter, r *http.Request) {
 			responseGauge.Inc()
 			defer responseGauge.Dec()
 
@@ -87,6 +90,14 @@ func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 				}
 			}
 		}
+
+		if m.responseHandler[response[0].From] == nil {
+			m.responseHandler[response[0].From] = &dynamicHandler{
+				handler: handlerFunc,
+			}
+		} else {
+			m.responseHandler[response[0].From].handler = handlerFunc
+		}
 	}
 }
 
@@ -97,7 +108,7 @@ func (m *HTTPCommunicator) RequestWith(requests []prototype.MessagePrototype) {
 
 // Close closes connection
 func (m *HTTPCommunicator) Close() error {
-	panic("not implemented") // TODO: Implement
+	panic("implement me")
 }
 
 // PostAndListen posts requests to endpoint and listens for response
@@ -125,12 +136,12 @@ func (m *HTTPCommunicator) PostAndListen() (chan model.ResponseMessage, error) {
 // ConsumeMediateReplyWithResponse listens as a server and consumes sends messages to the channel
 func (m *HTTPCommunicator) ConsumeMediateReplyWithResponse() {
 	go func() {
-		mux := http.NewServeMux()
+		m.mux = http.NewServeMux()
 		for endpoint, handler := range m.responseHandler {
 			log.Printf("Listening on endpoint: %s", endpoint)
-			mux.HandleFunc(endpoint, handler)
+			m.mux.Handle(endpoint, handler)
 		}
-		http.ListenAndServe(fmt.Sprintf(":%d", m.port), mux)
+		http.ListenAndServe(fmt.Sprintf(":%d", m.port), m.mux)
 	}()
 }
 
@@ -219,4 +230,12 @@ func getRequestBody(r *http.Request) []byte {
 	}
 
 	return nil
+}
+
+type dynamicHandler struct {
+	handler func(w http.ResponseWriter, r *http.Request)
+}
+
+func (d *dynamicHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	d.handler(w, r)
 }

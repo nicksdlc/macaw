@@ -77,6 +77,10 @@ func buildMatcher(cfg []config.Matcher) []matchers.Matcher {
 func buildBodyTemplate(body *config.Body) []string {
 	var bodyTemplate []string
 
+	if body == nil {
+		return bodyTemplate
+	}
+
 	for _, bodyPart := range body.File {
 		bodyTemplate = append(bodyTemplate, string(readMessageTemplate(bodyPart)))
 	}

@@ -1,7 +1,9 @@
 package admin
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -9,6 +11,7 @@ import (
 type Manager struct {
 	port      uint16
 	endpoints []Endpoint
+	server    *http.Server
 }
 
 // NewManager creates a new instance of Manager
@@ -26,6 +29,7 @@ func (m *Manager) AddEndpoint(endpoint Endpoint) {
 
 // Start starts the manager
 func (m *Manager) Start() {
+
 	// Create a new ServeMux.
 	mux := http.NewServeMux()
 
@@ -35,6 +39,18 @@ func (m *Manager) Start() {
 		mux.HandleFunc(endpoint.Path, endpoint.Function)
 	}
 
-	// Start the server
-	go http.ListenAndServe(fmt.Sprintf(":%d", m.port), mux)
+	m.server = &http.Server{
+		Addr:    fmt.Sprintf(":%d", m.port),
+		Handler: mux,
+	}
+
+	// start the server
+	if err := m.server.ListenAndServe(); err != nil {
+		log.Fatalf("Error starting server: %s", err)
+	}
+}
+
+// Stop stops the manager
+func (m *Manager) Stop() {
+	m.server.Shutdown(context.Background())
 }

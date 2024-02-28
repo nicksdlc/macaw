@@ -24,9 +24,8 @@ func main() {
 
 	if cfg.Admin != (config.Admin{}) && cfg.Admin.Enabled {
 		log.Printf("Starting admin server on port %d\n", cfg.Admin.Port)
-		// Casting for testing purposes
-		updateEndpoint := admin.UpdateEndpoint(ctx.GetCommunicator(), cfg.Responses)
-		mgr := admin.NewManager(cfg.Admin.Port, admin.HealthEndpoint(), updateEndpoint)
+		responsesEndpoint := admin.ResponsesEndpoint(ctx.GetCommunicator(), &cfg.Responses)
+		mgr := admin.NewManager(cfg.Admin.Port, admin.HealthEndpoint(), responsesEndpoint)
 		go mgr.Start()
 	}
 
