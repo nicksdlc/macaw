@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: Single Path, Single Schema With Number
+paths:
+  /with-number:
+    get:
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjWithNumber'          
+components:
+  schemas:
+    ObjWithNumber:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: int64
+          example: 10   

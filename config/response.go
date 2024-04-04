@@ -2,6 +2,8 @@ package config
 
 // Response configuration
 type Response struct {
+	Type            string
+	FromOpenAPI     string
 	Alias           string
 	To              string
 	ResponseRequest ResponseRequest `json:"request" yaml:"request" mapstructure:"request"`

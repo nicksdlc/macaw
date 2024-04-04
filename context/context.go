@@ -38,6 +38,7 @@ func (ctx *Context) Build(cfg *config.Configuration) (*Context, error) {
 	}
 
 	ctx.communicator = c
+	//TODO: rename get, unclear what it does
 	ctx.runner = get(ctx.communicator, *ctx.cfg)
 
 	return ctx, nil

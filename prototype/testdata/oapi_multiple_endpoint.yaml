@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: Simple API
+  version: 1.0.0
+paths:
+  /endpoint1:
+    get:
+      summary: Endpoint 1
+      description: This is the first endpoint.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint1Response'
+  /endpoint2:
+    get:
+      summary: Endpoint 2
+      description: This is the second endpoint.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint2Response'
+  /endpoint3:
+    get:
+      summary: Endpoint 3
+      description: This is the third endpoint.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint3Response'
+  /endpoint4:
+    get:
+      summary: Endpoint 4
+      description: This is the fourth endpoint.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint4Response'
+components:
+  schemas:
+    Endpoint1Response:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: "Hello from Endpoint 1!"
+    Endpoint2Response:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: string
+      example:
+        data: ["item1", "item2", "item3"]
+    Endpoint3Response:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+      example:
+        id: 123
+        name: "John Doe"
+        email: "john@example.com"
+    Endpoint4Response:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["active", "inactive"]
+      example:
+        status: "active"

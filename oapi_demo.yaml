@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Demo API
+  version: 1.0.0
+  description: A simple API for demonstration
+paths:
+  /demo:
+    get:
+      summary: Get Demo
+      description: Returns a demo response
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoResponse'
+components:
+  schemas:
+    DemoResponse:
+      type: object
+      properties:
+        number1:
+          type: number
+        number2:
+          type: number
+        number3:
+          type: number
+      required:
+        - number1
+        - number2
+        - number3

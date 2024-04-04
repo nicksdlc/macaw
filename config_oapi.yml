@@ -1,0 +1,20 @@
+Admin:
+  Enabled: true
+  Port: 1235
+ConnectThrough: HTTP
+DumpMetrics:
+  Enabled: true
+  Frequency: 5
+HTTP:
+  Serve: 
+    Host: /
+    Port: 1234
+Mode: receiver
+Responses:
+  - Response:
+    FromOpenAPI: oapi_demo.yaml
+    Request:
+      To: "/oapi"
+    Options: 
+      Quantity: 1
+

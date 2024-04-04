@@ -9,6 +9,7 @@ import (
 )
 
 // BetweemNumber type for number in between min and max
+// TODO: Fix Typo
 type BetweemNumber struct {
 	min int
 	max int
