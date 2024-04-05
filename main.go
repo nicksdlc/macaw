@@ -33,7 +33,7 @@ func main() {
 }
 
 func readConfig() config.Configuration {
-	return config.Read("config")
+	return config.ReadConfigFromArg()
 }
 
 func collectMetrics(frequency int) {
