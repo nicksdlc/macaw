@@ -2,7 +2,10 @@ package config
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -63,4 +66,18 @@ func Read(name string) Configuration {
 	}
 
 	return configuration
+}
+
+// ReadConfigFromArg reads the configuration file path from the command line
+func ReadConfigFromArg() Configuration {
+	pflag.StringP("config", "c", "config.yml", "Path to configuration file")
+
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
+	cfg := viper.GetString("config")
+	cfg = strings.TrimSuffix(cfg, filepath.Ext(cfg))
+
+	fmt.Printf("Starting with config file: %s. Use --config, -c to specify another file\n", cfg)
+	return Read(cfg)
 }
