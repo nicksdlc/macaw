@@ -3,10 +3,6 @@ Macaw is a tool to mock remote service. It can work in "sender" and "responder" 
 
 In respective mode it will either send a defined number of requests or respond to request with specified response.
 
-## Configuration
-
-Macaw is configured via config.yml. Example is repository root.
-
 ## Run
 
 Macaw can be executed either by
@@ -16,8 +12,18 @@ go run main.go
 
 Or by building it to executable.
 
-## Configuration
 
+## Configuration
+By default macaw uses config.yml in the repository root. You can specify other config - use `--config, -c` flag:
+
+```
+go run main.go --config other-config.yml
+```
+There is also a shorthand `-c`:
+
+```
+go run main.go -c other-config.yml
+```
 ### :godmode: Modes
 
 Currently two modes are supported:
