@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Simple API
+  description: A simple API with a single endpoint
+  version: 1.0.0
+paths:
+  /example:
+    get:
+      summary: Get Example
+      description: Returns a simple example response
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExampleResponse'
+
+components:
+  schemas:
+    ExampleResponse:
+      type: object
+      properties:
+        testInt:
+          type: integer
+          example: 42

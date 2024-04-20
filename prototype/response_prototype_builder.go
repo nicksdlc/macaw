@@ -1,6 +1,8 @@
 package prototype
 
 import (
+	"log"
+
 	"github.com/nicksdlc/macaw/config"
 	"github.com/nicksdlc/macaw/mediator"
 
@@ -24,7 +26,17 @@ func (rtb *ResponsePrototypeBuilder) Build() []MessagePrototype {
 	var templates []MessagePrototype
 
 	for _, response := range rtb.responseConfig {
-		templates = append(templates, rtb.BuildResponse(response))
+		if response.FromOpenAPI == "" {
+			templates = append(templates, rtb.BuildResponse(response))
+		} else {
+			tmpls, err := rtb.BuildFromOAPISpec(response)
+			if err != nil {
+				log.Printf("Failed to add response from OpenAPI spec '%s':%s", response.FromOpenAPI, err)
+				continue
+			}
+
+			templates = append(templates, tmpls...)
+		}
 	}
 
 	return templates
