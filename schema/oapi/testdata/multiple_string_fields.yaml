@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: Number Fields API
+  version: 1.0.0
+paths:
+  /strings:
+    post:
+      summary: Add Numbers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StringFields'
+      responses:
+        '200':
+          description: Successfully added numbers
+        '400':
+          description: Bad request, invalid input
+components:
+  schemas:
+    StringFields:
+      type: object
+      properties:
+        strField1:
+          type: string
+        strField2:
+          type: string
+        strField3:
+          type: string
