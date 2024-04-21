@@ -18,6 +18,8 @@ type Generator func(Data, *Context)
 // ObjGenerator is a generator for object
 type ObjGenerator func() Data
 
+// NewObjGenerator returns an ObjGenerator function. This function creates instance of Data and Context
+// Then calls generator provided as argument and returns Data filled with generated values.
 func NewObjGenerator(g Generator) ObjGenerator {
 	return func() Data {
 		data := Data{}
@@ -31,6 +33,13 @@ func NewObjGenerator(g Generator) ObjGenerator {
 func GenerateUint(field string) Generator {
 	return func(data Data, _ *Context) {
 		data[field] = gofakeit.Uint()
+	}
+}
+
+// GenerateString generates a random word
+func GenerateString(field string) Generator {
+	return func(data Data, _ *Context) {
+		data[field] = gofakeit.Word()
 	}
 }
 

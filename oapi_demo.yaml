@@ -26,6 +26,8 @@ components:
           type: number
         number3:
           type: number
+        string1:
+          type: string
       required:
         - number1
         - number2
