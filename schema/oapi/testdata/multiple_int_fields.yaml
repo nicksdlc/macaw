@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  title: Number Fields API
+  title: Integer Fields API
   version: 1.0.0
 paths:
-  /numbers:
+  /integers:
     post:
       summary: Add Numbers
       requestBody:
@@ -11,20 +11,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NumberFields'
+              $ref: '#/components/schemas/IntFields'
       responses:
         '200':
-          description: Successfully added numbers
+          description: Successfully added integers
         '400':
           description: Bad request, invalid input
 components:
   schemas:
-    NumberFields:
+    IntFields:
       type: object
       properties:
         field1:
-          type: number
+          type: integer
         field2:
-          type: number
+          type: integer
         field3:
-          type: number
+          type: integer

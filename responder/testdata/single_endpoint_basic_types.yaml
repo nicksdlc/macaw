@@ -3,6 +3,8 @@ info:
   title: Simple API
   description: A simple API with a single endpoint
   version: 1.0.0
+servers:
+  - url: http://localhost:1234/test-oapi
 paths:
   /example:
     get:
@@ -24,3 +26,6 @@ components:
         testInt:
           type: integer
           example: 42
+        testString:
+          type: string
+          example: 'test'

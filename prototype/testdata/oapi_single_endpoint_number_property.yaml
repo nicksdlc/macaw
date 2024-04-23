@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Single Path, Single Schema With Number
 paths:
-  /with-number:
+  /with-int:
     get:
       responses:
         '200':
@@ -10,13 +10,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjWithNumber'          
+                $ref: '#/components/schemas/ObjWithInt'          
 components:
   schemas:
-    ObjWithNumber:
+    ObjWithInt:
       type: object
       properties:
         number:
           type: integer
-          format: int64
           example: 10   

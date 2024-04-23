@@ -71,19 +71,22 @@ func (m *HTTPCommunicator) RespondWith(responses []prototype.MessagePrototype) {
 		// re-assignment is required since, if not done here - will always point to last response
 		res := response
 
-		handlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		handlerFunc := func(w http.ResponseWriter, req *http.Request) {
 			responseGauge.Inc()
 			defer responseGauge.Dec()
 
 			message := model.RequestMessage{
-				Body:    getRequestBody(r),
-				Headers: getQueryParams(r.URL),
+				Body:    getRequestBody(req),
+				Headers: getQueryParams(req.URL),
 			}
 
 			for _, respPrototype := range res {
 				resp := model.ResponseMessage{}
 				for r := range respPrototype.Mediators.Run(message, resp) {
 					if matchers.MatchAny(respPrototype.Matcher, message) {
+						if contentType, present := r.Metadata["Content-Type"]; present && contentType != "" {
+							w.Header().Add("Content-Type", contentType)
+						}
 						io.WriteString(w, r.Body)
 						return
 					}

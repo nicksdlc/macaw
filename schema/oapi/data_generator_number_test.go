@@ -15,10 +15,10 @@ func TestShouldGenerateSingleField(t *testing.T) {
 	res := sut()
 
 	assert.Equal(t, 1, len(res), "Should generate 1 field")
-	gen.AssertUintField(t, res, "number", 2)
+	gen.AssertIntField(t, res, "number", 2)
 }
 
-func TestShouldGenerateMultipleFields(t *testing.T) {
+func TestShouldGenerateMultipleIntFields(t *testing.T) {
 	gen.InitDumb()
 	model, _ := LoadModel("./testdata/multiple_int_fields.yaml")
 	sut := NewGeneratorFromSchema(model.Model.Components.Schemas.First().Value().Schema())
@@ -27,7 +27,7 @@ func TestShouldGenerateMultipleFields(t *testing.T) {
 
 	assert.Equal(t, 3, len(res), "Should generate 3 fields")
 
-	gen.AssertUintField(t, res, "field1", 2)
-	gen.AssertUintField(t, res, "field2", 3)
-	gen.AssertUintField(t, res, "field3", 4)
+	gen.AssertIntField(t, res, "field1", 2)
+	gen.AssertIntField(t, res, "field2", 3)
+	gen.AssertIntField(t, res, "field3", 4)
 }

@@ -10,13 +10,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjWithNumber'          
+                $ref: '#/components/schemas/ObjWithInt'          
 components:
   schemas:
-    ObjWithNumber:
+    ObjWithInt:
       type: object
       properties:
         number:
           type: integer
-          format: int64
           example: 10   

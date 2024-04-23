@@ -26,7 +26,7 @@ func TestSingleGetEndpoint(t *testing.T) {
 	responsePrototypes := NewResponsePrototypeBuilder(responseConfig).Build()
 
 	assert.Equal(t, 1, len(responsePrototypes))
-	assert.Equal(t, "/base-addr/with-number", responsePrototypes[0].From)
+	assert.Equal(t, "/base-addr/with-int", responsePrototypes[0].From)
 	assert.Equal(t, "GET", responsePrototypes[0].Type)
 }
 

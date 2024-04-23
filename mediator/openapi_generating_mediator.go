@@ -29,6 +29,10 @@ func (gm *oapiGeneratingMediator) Mediate(message model.RequestMessage, response
 			for i := 0; i < gm.quantity; i++ {
 				obj := gm.generator()
 				json, _ := json.Marshal(obj)
+				if response.Metadata == nil {
+					response.Metadata = map[string]string{}
+				}
+				response.Metadata["Content-Type"] = "application/json"
 				out <- model.ResponseMessage{
 					Body:     string(json),
 					Metadata: response.Metadata,
