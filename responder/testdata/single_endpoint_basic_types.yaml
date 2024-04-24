@@ -29,3 +29,6 @@ components:
         testString:
           type: string
           example: 'test'
+        testNumber:
+          type: number
+          example: 3.14

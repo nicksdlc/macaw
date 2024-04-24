@@ -15,12 +15,16 @@ import (
 	validator "github.com/pb33f/libopenapi-validator"
 	"github.com/pb33f/libopenapi-validator/errors"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestShouldRespondFromOAPISpecBasicTypes(t *testing.T) {
 	schemaPath := "./testdata/single_endpoint_basic_types.yaml"
+	// Note, that number is generated as float and requires way higher number as seed to be > 0
+	// So, in some cases number fields will be 0, although still present in final data
 	gen.InitDumb()
-	expected := "{\"testInt\":2,\"testString\":\"it\"}"
+	expected := readExpectedJson("./testdata/expected_basic_types.json")
 	port, err := getFreePort()
 	if err != nil {
 		t.Fatalf("No port is available: %s", err.Error())
@@ -43,7 +47,7 @@ func TestShouldRespondFromOAPISpecBasicTypes(t *testing.T) {
 
 	result, _ := io.ReadAll(response.Body)
 	resultStr := string(result)
-	assert.Equal(t, expected, resultStr)
+	require.JSONEq(t, expected, resultStr)
 	validateAgainstSchema(t, schemaPath, response)
 }
 
@@ -62,6 +66,11 @@ func validateAgainstSchema(t *testing.T, schemaPath string, response *http.Respo
 
 	assert.Equal(t, 0, len(errors), "Response has %d errors\n %s", len(errors), formatErrors(errors))
 
+}
+
+func readExpectedJson(name string) string {
+	file, _ := os.ReadFile(name)
+	return string(file)
 }
 
 func formatErrors(errs []*errors.ValidationError) string {
