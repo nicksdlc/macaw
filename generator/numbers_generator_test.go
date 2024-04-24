@@ -8,8 +8,8 @@ func TestUintShouldSet2(t *testing.T) {
 	InitDumb()
 	res := Data{}
 
-	sut := GenerateUint("testuint")
+	sut := GenerateInt("testuint")
 	sut(res, &Context{})
 
-	AssertUintField(t, res, "testuint", 2)
+	AssertIntField(t, res, "testuint", 2)
 }

@@ -29,10 +29,10 @@ func NewObjGenerator(g Generator) ObjGenerator {
 	}
 }
 
-// GenerateUint generates uint
-func GenerateUint(field string) Generator {
+// GenerateInt generates uint
+func GenerateInt(field string) Generator {
 	return func(data Data, _ *Context) {
-		data[field] = gofakeit.Uint()
+		data[field] = gofakeit.Int()
 	}
 }
 

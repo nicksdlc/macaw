@@ -14,7 +14,6 @@ var typeHandlers = map[string]typeHandler{}
 
 func init() {
 	//TODO: bug, number can be float or double and now handled as integer
-	typeHandlers["number"] = handleInteger
 	typeHandlers["integer"] = handleInteger
 	typeHandlers["string"] = handleString
 }
@@ -37,7 +36,7 @@ func NewGeneratorFromSchema(model *base.Schema) gen.ObjGenerator {
 }
 
 func handleInteger(p orderedmap.Pair[string, *base.SchemaProxy]) gen.Generator {
-	return gen.GenerateUint(p.Key())
+	return gen.GenerateInt(p.Key())
 }
 
 func handleString(p orderedmap.Pair[string, *base.SchemaProxy]) gen.Generator {

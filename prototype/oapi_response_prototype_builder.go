@@ -34,7 +34,7 @@ func (rtb *ResponsePrototypeBuilder) BuildFromOAPISpec(responseConfig config.Res
 			path = path.Next()
 			continue
 		}
-		from, err := combineTo(responseConfig.ResponseRequest.To, path.Key())
+		from, err := combineFrom(responseConfig.ResponseRequest.To, path.Key())
 
 		if err != nil {
 			return nil, err
@@ -64,7 +64,7 @@ func (rtb *ResponsePrototypeBuilder) BuildFromOAPISpec(responseConfig config.Res
 	return result, nil
 }
 
-func combineTo(base, addr string) (string, error) {
+func combineFrom(base, addr string) (string, error) {
 	return path.Join(base, addr), nil
 }
 
