@@ -43,6 +43,13 @@ func GenerateString(field string) Generator {
 	}
 }
 
+// GenerateFloat generates float32
+func GenerateFloat(field string) Generator {
+	return func(data Data, _ *Context) {
+		data[field] = gofakeit.Float32()
+	}
+}
+
 // Compose is a helper function that composes 2 generators. If one is nil, returns other without changes.
 // if both are not nil - creates a wrapper function that calls first generator and then calls second one
 func Compose(f Generator, g Generator) Generator {
@@ -63,4 +70,8 @@ func Compose(f Generator, g Generator) Generator {
 // InitDumb initializes generator in predictable mode for tests
 func InitDumb() {
 	gofakeit.GlobalFaker = gofakeit.NewFaker(source.NewDumb(1), false)
+}
+
+func InitDumbWithSeed(seed uint64) {
+	gofakeit.GlobalFaker = gofakeit.NewFaker(source.NewDumb(seed), false)
 }

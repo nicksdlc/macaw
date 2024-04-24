@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Single Path, Single Schema With Number
+paths:
+  /test-number:
+    get:
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjWithFloat32'          
+components:
+  schemas:
+    ObjWithFloat32:
+      type: object
+      properties:
+        float32-test:
+          type: number
+          example: 10   
